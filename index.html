@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hammadde Veri Giriş Sistemi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f1117; font-family: 'Segoe UI', sans-serif; color: #e2e8f0; min-height: 100vh; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #141820; }
+::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 3px; }
+input, select { font-family: inherit; }
+input:focus, select:focus { outline: none; border-color: #3b82f6 !important; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+.btn-primary { background: linear-gradient(135deg,#3b82f6,#6366f1); color:#fff; border:none; border-radius:8px; padding:10px 22px; cursor:pointer; font-weight:700; font-size:14px; transition:opacity 0.2s; }
+.btn-primary:hover { opacity:0.88; }
+.btn-secondary { background:#1e2430; color:#94a3b8; border:1px solid #2d3748; border-radius:8px; padding:10px 18px; cursor:pointer; font-size:13px; transition:all 0.2s; }
+.btn-secondary:hover { background:#252f40; color:#e2e8f0; }
+.btn-danger { background:#2d1a1a; color:#ef4444; border:1px solid #ef444433; border-radius:8px; padding:8px 14px; cursor:pointer; font-size:13px; }
+.btn-danger:hover { background:#3d2020; }
+.field-label { display:block; font-size:11px; color:#64748b; margin-bottom:5px; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; }
+.field-input { width:100%; background:#0f1117; border:1px solid #1e2430; border-radius:8px; padding:9px 12px; color:#e2e8f0; font-size:13px; transition:border-color 0.2s; }
+.field-input::placeholder { color:#334155; }
+.section-title { font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#64748b; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #1e2430; }
+.card { background:#141820; border:1px solid #1e2430; border-radius:12px; padding:20px; }
+.month-input { width:100%; background:#0f1117; border:1px solid #1e2430; border-radius:6px; padding:7px 8px; color:#e2e8f0; font-size:12px; text-align:right; }
+.month-input::placeholder { color:#2d3748; }
+.year-header { font-size:13px; font-weight:700; color:#f1f5f9; margin-bottom:10px; padding:6px 10px; border-radius:6px; display:inline-block; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+const EXCEL_VERISI = [{"id": 4001, "sk": "S", "stokKodu": "16", "urunKodu": "540004", "tur": "KUVARS", "hammaddeIsmi": "KUVARS 45M MATEL – ALM.", "stokMiktari": "40610", "hesaplananOptimum": "40500", "terminSuresi": "20", "tuketim": {"2023": {"Ocak": 96639.5, "Şubat": 71008, "Mart": 74215, "Nisan": 59315, "Mayıs": 94081.5, "Haziran": 94556.25, "Temmuz": 76476.75, "Ağustos": 84829.25, "Eylül": 88636, "Ekim": 101870, "Kasım": 69405, "Aralık": 58850}, "2024": {"Ocak": 68819.25, "Şubat": 74325, "Mart": 60231, "Nisan": 53378, "Mayıs": 68374, "Haziran": 66584, "Temmuz": 54946, "Ağustos": 70310, "Eylül": 28312, "Ekim": 48481, "Kasım": 48101, "Aralık": 67894.44}, "2025": {"Ocak": 15009, "Şubat": 74464.52, "Mart": 34859, "Nisan": 36289, "Mayıs": 76653.52, "Haziran": 10039, "Temmuz": 72961.8, "Ağustos": 53896, "Eylül": 45949.25, "Ekim": 47925.26, "Kasım": 32995, "Aralık": 54839}, "2026": {"Ocak": 47902.5, "Şubat": 36054, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 5001, "sk": "S", "stokKodu": "3539", "urunKodu": "540056", "tur": "KUVARS", "hammaddeIsmi": "KUVARS 45M MİKROMAN – SERT POR. VE SW", "stokMiktari": "4688", "hesaplananOptimum": "38394", "terminSuresi": "20", "tuketim": {"2023": {"Ocak": 91322, "Şubat": 131843, "Mart": 143183, "Nisan": 125935, "Mayıs": 115323, "Haziran": 83554, "Temmuz": 101682, "Ağustos": 86651, "Eylül": 112531, "Ekim": 55657, "Kasım": 61789, "Aralık": 139137}, "2024": {"Ocak": 124044.5, "Şubat": 83423.1, "Mart": 138482, "Nisan": 88283, "Mayıs": 94292.5, "Haziran": 36486, "Temmuz": 93881, "Ağustos": 19405, "Eylül": 71024.6, "Ekim": 55232, "Kasım": 66112.15, "Aralık": 4614}, "2025": {"Ocak": 131633, "Şubat": 7766, "Mart": 77382, "Nisan": 55353, "Mayıs": 16015, "Haziran": 72374.1, "Temmuz": 11534, "Ağustos": 41718, "Eylül": 42339.5, "Ekim": 72960, "Kasım": 72622.3, "Aralık": 54002}, "2026": {"Ocak": 63220, "Şubat": 45019, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 6001, "sk": "S", "stokKodu": "5", "urunKodu": "510025", "tur": "KAOLEN", "hammaddeIsmi": "GROLLEG", "stokMiktari": "150363", "hesaplananOptimum": "247000", "terminSuresi": "133", "tuketim": {"2023": {"Ocak": 90224.1, "Şubat": 117696.5, "Mart": 203672, "Nisan": 158652.2, "Mayıs": 109579.5, "Haziran": 85867.5, "Temmuz": 96345.1, "Ağustos": 81466.7, "Eylül": 121473.7, "Ekim": 106643.3, "Kasım": 60145.1, "Aralık": 140902.7}, "2024": {"Ocak": 152426.4, "Şubat": 85319.48, "Mart": 136275.3, "Nisan": 89322.2, "Mayıs": 104931.4, "Haziran": 36443.2, "Temmuz": 103483.8, "Ağustos": 9938.8, "Eylül": 68544.8, "Ekim": 59800.4, "Kasım": 69664.6, "Aralık": 2473.2}, "2025": {"Ocak": 140441.8, "Şubat": 1049.11, "Mart": 80954.7, "Nisan": 56668.7, "Mayıs": 9390.8, "Haziran": 79581.3, "Temmuz": 4183, "Ağustos": 37754.6, "Eylül": 34724.02, "Ekim": 70958.5, "Kasım": 68573.28, "Aralık": 44277.3}, "2026": {"Ocak": 62507.66, "Şubat": 33312, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 7001, "sk": "S", "stokKodu": "3220", "urunKodu": "511514", "tur": "KAOLEN", "hammaddeIsmi": "KAOLEN B0 GLAZE", "stokMiktari": "165639", "hesaplananOptimum": "130039", "terminSuresi": "90", "tuketim": {"2023": {"Ocak": 71006, "Şubat": 145236.6, "Mart": 217060, "Nisan": 145643.3, "Mayıs": 101685.9, "Haziran": 53626, "Temmuz": 95073.3, "Ağustos": 51791.3, "Eylül": 85143.5, "Ekim": 97999.3, "Kasım": 86437.3, "Aralık": 88868.3}, "2024": {"Ocak": 117198.3, "Şubat": 54739, "Mart": 112145.6, "Nisan": 58600, "Mayıs": 60349.3, "Haziran": 25053.3, "Temmuz": 60035.3, "Ağustos": 52430, "Eylül": 66987.3, "Ekim": 36187.3, "Kasım": 62679.9, "Aralık": 6132}, "2025": {"Ocak": 75854.6, "Şubat": 25732, "Mart": 45915.3, "Nisan": 33902, "Mayıs": 28374.6, "Haziran": 48486, "Temmuz": 25485.3, "Ağustos": 19471, "Eylül": 37416.3, "Ekim": 45966, "Kasım": 55404, "Aralık": 53535.3}, "2026": {"Ocak": 35916, "Şubat": 33001.3, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 8001, "sk": "S", "stokKodu": "15", "urunKodu": "530007", "tur": "FELDSPAT", "hammaddeIsmi": "FELDSPAT 45 M MATEL", "stokMiktari": "13842", "hesaplananOptimum": "24000", "terminSuresi": "30", "tuketim": {"2023": {"Ocak": 39187, "Şubat": 48974.75, "Mart": 56820, "Nisan": 51514, "Mayıs": 47385, "Haziran": 33739.1, "Temmuz": 40541.7, "Ağustos": 32027.1, "Eylül": 47514, "Ekim": 41563, "Kasım": 23035, "Aralık": 53465}, "2024": {"Ocak": 56804.6, "Şubat": 32107.5, "Mart": 53123, "Nisan": 31499, "Mayıs": 45773, "Haziran": 15435, "Temmuz": 43170, "Ağustos": 5600, "Eylül": 28315, "Ekim": 20946, "Kasım": 29085.5, "Aralık": 2240}, "2025": {"Ocak": 58878.5, "Şubat": 1400, "Mart": 34070, "Nisan": 24151, "Mayıs": 5137, "Haziran": 34021, "Temmuz": 3408, "Ağustos": 16074, "Eylül": 15581.5, "Ekim": 32927.5, "Kasım": 28136, "Aralık": 17675}, "2026": {"Ocak": 28745.8, "Şubat": 16682, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 9001, "sk": "S", "stokKodu": "2691", "urunKodu": "530099", "tur": "ALBİT", "hammaddeIsmi": "ALBİT KALTUN (SW -ALM. BASINÇLI)", "stokMiktari": "58492", "hesaplananOptimum": "60937", "terminSuresi": "45", "tuketim": {"2023": {"Ocak": 204418, "Şubat": 197204.5, "Mart": 205821, "Nisan": 101956, "Mayıs": 59635.5, "Haziran": 21485, "Temmuz": 39942.5, "Ağustos": 22050, "Eylül": 116460.5, "Ekim": 60535, "Kasım": 73893.5, "Aralık": 41708.5}, "2024": {"Ocak": 37546, "Şubat": 38975.5, "Mart": 62290.5, "Nisan": 43644.5, "Mayıs": 39407.5, "Haziran": 34782, "Temmuz": 25618.5, "Ağustos": 83062.5, "Eylül": 46678, "Ekim": 27706, "Kasım": 45595.5, "Aralık": 46742}, "2025": {"Ocak": 2487.5, "Şubat": 79764.49, "Mart": 14303.5, "Nisan": 32868.5, "Mayıs": 59747, "Haziran": 18431, "Temmuz": 72792.5, "Ağustos": 24618.5, "Eylül": 30372, "Ekim": 21397, "Kasım": 34686.25, "Aralık": 52079}, "2026": {"Ocak": 23517.5, "Şubat": 25985, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 10001, "sk": "K", "stokKodu": "3192", "urunKodu": "530118", "tur": "ALBİT", "hammaddeIsmi": "ALBİT SİBELCO (NRM.DÖKÜM)", "stokMiktari": "1158", "hesaplananOptimum": "0", "terminSuresi": "63", "tuketim": {"2023": {"Ocak": 0, "Şubat": 1596, "Mart": 3192, "Nisan": 36708, "Mayıs": 138153.5, "Haziran": 145453.5, "Temmuz": 106473, "Ağustos": 129960, "Eylül": 33432, "Ekim": 32312, "Kasım": 74172, "Aralık": 62524}, "2024": {"Ocak": 33096, "Şubat": 85960, "Mart": 64512, "Nisan": 54572, "Mayıs": 89208, "Haziran": 88956, "Temmuz": 73327.52, "Ağustos": 72128, "Eylül": 28224, "Ekim": 61152, "Kasım": 48748, "Aralık": 72128}, "2025": {"Ocak": 25088, "Şubat": 39200, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2026": {"Ocak": 0, "Şubat": 0, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 11001, "sk": "S", "stokKodu": "2642", "urunKodu": "530088", "tur": "ALBİT", "hammaddeIsmi": "ALBİT ESAN (BONE CHINA)", "stokMiktari": "2384", "hesaplananOptimum": "55000", "terminSuresi": "60", "tuketim": {"2023": {"Ocak": 6.25, "Şubat": 1610.25, "Mart": 56, "Nisan": 10, "Mayıs": 0, "Haziran": 1906.1, "Temmuz": 2366.7, "Ağustos": 358.1, "Eylül": 1540, "Ekim": 1568, "Kasım": 0, "Aralık": 0}, "2024": {"Ocak": 1934.1, "Şubat": 12.5, "Mart": 10, "Nisan": 0, "Mayıs": 12.5, "Haziran": 0, "Temmuz": 0, "Ağustos": 22.5, "Eylül": 10, "Ekim": 12.5, "Kasım": 0, "Aralık": 12.71}, "2025": {"Ocak": 0, "Şubat": 45484.5, "Mart": 42482.35, "Nisan": 36368, "Mayıs": 95620, "Haziran": 0, "Temmuz": 75266, "Ağustos": 62735.67, "Eylül": 60729, "Ekim": 66206.6, "Kasım": 31360, "Aralık": 70560}, "2026": {"Ocak": 62720, "Şubat": 47040, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 12001, "sk": "S", "stokKodu": "1230", "urunKodu": "510038", "tur": "KAOLEN", "hammaddeIsmi": "KAOLEN OKA", "stokMiktari": "205711", "hesaplananOptimum": "198000", "terminSuresi": "90", "tuketim": {"2023": {"Ocak": 99025.5, "Şubat": 77000, "Mart": 38013, "Nisan": 30445, "Mayıs": 66438.5, "Haziran": 61523.5, "Temmuz": 45093.5, "Ağustos": 56142, "Eylül": 57630, "Ekim": 37988.5, "Kasım": 54237.5, "Aralık": 53734.5}, "2024": {"Ocak": 26467, "Şubat": 61570.5, "Mart": 58255.5, "Nisan": 50234.5, "Mayıs": 61811, "Haziran": 67888.5, "Temmuz": 58905.5, "Ağustos": 73746.5, "Eylül": 34322, "Ekim": 53698, "Kasım": 46275.5, "Aralık": 71249}, "2025": {"Ocak": 16996.5, "Şubat": 89693.5, "Mart": 33739.5, "Nisan": 42139, "Mayıs": 82927, "Haziran": 11055, "Temmuz": 79729.5, "Ağustos": 52440, "Eylül": 44794.5, "Ekim": 50353, "Kasım": 31750, "Aralık": 57055}, "2026": {"Ocak": 54441, "Şubat": 38245, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 13001, "sk": "S", "stokKodu": "2314", "urunKodu": "510192", "tur": "KAOLEN", "hammaddeIsmi": "KAOLEN BZ", "stokMiktari": "142707", "hesaplananOptimum": "164500", "terminSuresi": "90", "tuketim": {"2023": {"Ocak": 86085.5, "Şubat": 73118, "Mart": 20778, "Nisan": 13868, "Mayıs": 27085.5, "Haziran": 24686.5, "Temmuz": 19002, "Ağustos": 21604, "Eylül": 36209, "Ekim": 23958, "Kasım": 40628, "Aralık": 37548}, "2024": {"Ocak": 19116, "Şubat": 44964, "Mart": 38232, "Nisan": 35336, "Mayıs": 42264, "Haziran": 54362, "Temmuz": 52268, "Ağustos": 30254, "Eylül": 19004, "Ekim": 44848, "Kasım": 39638, "Aralık": 57974}, "2025": {"Ocak": 14784, "Şubat": 74206, "Mart": 27102, "Nisan": 33289, "Mayıs": 69624, "Haziran": 6630, "Temmuz": 64242, "Ağustos": 43590, "Eylül": 41742, "Ekim": 45438, "Kasım": 22900, "Aralık": 52630}, "2026": {"Ocak": 44695, "Şubat": 32140, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 14001, "sk": "S", "stokKodu": "3531", "urunKodu": "511537", "tur": "KAOLEN", "hammaddeIsmi": "KAOLEN BZA", "stokMiktari": "264882", "hesaplananOptimum": "3139.5", "terminSuresi": "63", "tuketim": {"2023": {"Ocak": 48910, "Şubat": 14560, "Mart": 1176, "Nisan": 8848, "Mayıs": 31325, "Haziran": 33674.5, "Temmuz": 23702, "Ağustos": 29526, "Eylül": 24640, "Ekim": 9184, "Kasım": 21532, "Aralık": 16128}, "2024": {"Ocak": 8008, "Şubat": 18312, "Mart": 14672, "Nisan": 12376, "Mayıs": 21476, "Haziran": 9048, "Temmuz": 1040, "Ağustos": 2340, "Eylül": 1040, "Ekim": 1040, "Kasım": 1300, "Aralık": 1820}, "2025": {"Ocak": 0, "Şubat": 2860, "Mart": 260, "Nisan": 1430, "Mayıs": 1560, "Haziran": 780, "Temmuz": 2340, "Ağustos": 780, "Eylül": 1564, "Ekim": 780, "Kasım": 520, "Aralık": 1300}, "2026": {"Ocak": 910, "Şubat": 520, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 15001, "sk": "S", "stokKodu": "1", "urunKodu": "520005", "tur": "KİL", "hammaddeIsmi": "KİL EWVA", "stokMiktari": "35855", "hesaplananOptimum": "37500", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 12563, "Şubat": 26431, "Mart": 38352, "Nisan": 25819, "Mayıs": 18562, "Haziran": 9784, "Temmuz": 16735, "Ağustos": 9938, "Eylül": 15420.5, "Ekim": 17154, "Kasım": 8706, "Aralık": 15825}, "2024": {"Ocak": 16949, "Şubat": 10082, "Mart": 16364, "Nisan": 10428, "Mayıs": 11173.5, "Haziran": 4905, "Temmuz": 11385, "Ağustos": 8785, "Eylül": 12290, "Ekim": 6879, "Kasım": 11645, "Aralık": 1022}, "2025": {"Ocak": 14882, "Şubat": 6622, "Mart": 8914, "Nisan": 6214, "Mayıs": 7936, "Haziran": 8751.5, "Temmuz": 7354, "Ağustos": 4415, "Eylül": 9087, "Ekim": 9296.6, "Kasım": 12292.5, "Aralık": 13463}, "2026": {"Ocak": 7026, "Şubat": 8458.5, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 16001, "sk": "S", "stokKodu": "67", "urunKodu": "580006", "tur": "K.ALUMİNA", "hammaddeIsmi": "KALSİNE ALUMİNA HTM30", "stokMiktari": "205859", "hesaplananOptimum": "127000", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 177.75, "Şubat": 18217.25, "Mart": 33812, "Nisan": 26398, "Mayıs": 43665.5, "Haziran": 44222.25, "Temmuz": 31772.25, "Ağustos": 38801.25, "Eylül": 35413.25, "Ekim": 10143.41, "Kasım": 21681.75, "Aralık": 18523.75}, "2024": {"Ocak": 10421, "Şubat": 26335, "Mart": 19132.5, "Nisan": 16261.5, "Mayıs": 26647.25, "Haziran": 26095, "Temmuz": 21161, "Ağustos": 20875, "Eylül": 8237.5, "Ekim": 17620.5, "Kasım": 13976.5, "Aralık": 20927.5}, "2025": {"Ocak": 7241.5, "Şubat": 24412.25, "Mart": 12281.25, "Nisan": 10361.25, "Mayıs": 27607, "Haziran": 103.5, "Temmuz": 21829.36, "Ağustos": 18142, "Eylül": 17120, "Ekim": 19184.05, "Kasım": 9158.5, "Aralık": 20315.75}, "2026": {"Ocak": 18052.75, "Şubat": 13558.5, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 17001, "sk": "S", "stokKodu": "3564", "urunKodu": "581640", "tur": "K.ALUMİNA", "hammaddeIsmi": "KALSİNE ALUMİNA AC44B5", "stokMiktari": "86804", "hesaplananOptimum": "34367.5", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 52096, "Şubat": 19656, "Mart": 4228, "Nisan": 1216, "Mayıs": 4200, "Haziran": 3600, "Temmuz": 1800, "Ağustos": 3600, "Eylül": 1200, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2024": {"Ocak": 0, "Şubat": 3280, "Mart": 10440, "Nisan": 10280, "Mayıs": 10360, "Haziran": 7680, "Temmuz": 5960, "Ağustos": 12360, "Eylül": 6560, "Ekim": 6560, "Kasım": 7000, "Aralık": 10880}, "2025": {"Ocak": 600, "Şubat": 15640, "Mart": 2840, "Nisan": 8120, "Mayıs": 9840, "Haziran": 4320, "Temmuz": 13560, "Ağustos": 5520, "Eylül": 4336, "Ekim": 4320, "Kasım": 4480, "Aralık": 6400}, "2026": {"Ocak": 6040, "Şubat": 3280, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 18001, "sk": "K", "stokKodu": "2520", "urunKodu": "581148", "tur": "K.ALUMİNA", "hammaddeIsmi": "KALSİNE ALUMİNA 115TC", "stokMiktari": "0", "hesaplananOptimum": "0", "terminSuresi": "90", "tuketim": {"2023": {"Ocak": 13.5, "Şubat": 22.75, "Mart": 67.5, "Nisan": 8, "Mayıs": 0, "Haziran": 780, "Temmuz": 0, "Ağustos": 0, "Eylül": 4240, "Ekim": 9500, "Kasım": 9080, "Aralık": 10280}, "2024": {"Ocak": 4320, "Şubat": 3880, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2025": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2026": {"Ocak": 0, "Şubat": 0, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 19001, "sk": "S", "stokKodu": "10", "urunKodu": "530004", "tur": "FELDSPAT", "hammaddeIsmi": "FELDSPAT 28 M", "stokMiktari": "22273", "hesaplananOptimum": "9000", "terminSuresi": "40", "tuketim": {"2023": {"Ocak": 12116.5, "Şubat": 10307.4, "Mart": 8990, "Nisan": 10316.1, "Mayıs": 10684.8, "Haziran": 8734.5, "Temmuz": 9934.5, "Ağustos": 10734.8, "Eylül": 9805.7, "Ekim": 9884.8, "Kasım": 6452, "Aralık": 11367.3}, "2024": {"Ocak": 11046.4, "Şubat": 9943.36, "Mart": 9414.4, "Nisan": 8115.3, "Mayıs": 8129, "Haziran": 5961.6, "Temmuz": 7134.5, "Ağustos": 5256.3, "Eylül": 5052.8, "Ekim": 5277, "Kasım": 6345.8, "Aralık": 5806.22}, "2025": {"Ocak": 6775.2, "Şubat": 3633.18, "Mart": 7237.61, "Nisan": 5442.8, "Mayıs": 5200, "Haziran": 3765.96, "Temmuz": 5294.4, "Ağustos": 7373.75, "Eylül": 6183.17, "Ekim": 6787.09, "Kasım": 7625.86, "Aralık": 7134.5}, "2026": {"Ocak": 5766.92, "Şubat": 5954.52, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 20001, "sk": "S", "stokKodu": "826", "urunKodu": "550055", "tur": "DOLOMİT", "hammaddeIsmi": "DOLOMİT", "stokMiktari": "27899", "hesaplananOptimum": "6007", "terminSuresi": "18", "tuketim": {"2023": {"Ocak": 15407.62, "Şubat": 12270.4, "Mart": 12718, "Nisan": 13285.4, "Mayıs": 13494.4, "Haziran": 11237.6, "Temmuz": 12253.6, "Ağustos": 12898.4, "Eylül": 11211.2, "Ekim": 12370.4, "Kasım": 8256, "Aralık": 12583}, "2024": {"Ocak": 11197.2, "Şubat": 12425.63, "Mart": 12656.2, "Nisan": 9792, "Mayıs": 10483.25, "Haziran": 7856.8, "Temmuz": 8663.6, "Ağustos": 9316.25, "Eylül": 5719.4, "Ekim": 7267.25, "Kasım": 6883.6, "Aralık": 10190.17}, "2025": {"Ocak": 6079.6, "Şubat": 6723.09, "Mart": 8518.68, "Nisan": 6298.4, "Mayıs": 8934, "Haziran": 4515.18, "Temmuz": 9764.2, "Ağustos": 10574.39, "Eylül": 7865.2, "Ekim": 8464.85, "Kasım": 9402.78, "Aralık": 9653.6}, "2026": {"Ocak": 7325.16, "Şubat": 7494.36, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 21001, "sk": "S", "stokKodu": "2725", "urunKodu": "511472", "tur": "KAOLEN", "hammaddeIsmi": "KAOLEN KC 198 (ALM)", "stokMiktari": "250017", "hesaplananOptimum": "24323.5", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 1088.75, "Şubat": 4815, "Mart": 12197, "Nisan": 16192, "Mayıs": 85992, "Haziran": 92402, "Temmuz": 63600, "Ağustos": 79567, "Eylül": 58630, "Ekim": 10718, "Kasım": 14520, "Aralık": 13680}, "2024": {"Ocak": 9600, "Şubat": 16231.5, "Mart": 12854, "Nisan": 17272, "Mayıs": 27682.5, "Haziran": 14856, "Temmuz": 5512, "Ağustos": 7292.5, "Eylül": 2462, "Ekim": 4726.5, "Kasım": 3896, "Aralık": 6913.79}, "2025": {"Ocak": 1256, "Şubat": 6286.5, "Mart": 4040.89, "Nisan": 3093, "Mayıs": 8096, "Haziran": 720, "Temmuz": 7011.6, "Ağustos": 6221.94, "Eylül": 5008, "Ekim": 4976.1, "Kasım": 4085, "Aralık": 5400}, "2026": {"Ocak": 5426.4, "Şubat": 5639.12, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 22001, "sk": "S", "stokKodu": "1993", "urunKodu": "510147", "tur": "KAOLEN", "hammaddeIsmi": "VPS MOTA", "stokMiktari": "25919", "hesaplananOptimum": "16500", "terminSuresi": "123", "tuketim": {"2023": {"Ocak": 3285, "Şubat": 13140, "Mart": 6568, "Nisan": 6570, "Mayıs": 3285, "Haziran": 3285, "Temmuz": 3285, "Ağustos": 3285, "Eylül": 6570, "Ekim": 3285, "Kasım": 3285, "Aralık": 3285}, "2024": {"Ocak": 6628.5, "Şubat": 8139.5, "Mart": 3285, "Nisan": 3139, "Mayıs": 3139, "Haziran": 3139, "Temmuz": 6278, "Ağustos": 0, "Eylül": 3139, "Ekim": 2920, "Kasım": 4420, "Aralık": 0}, "2025": {"Ocak": 10220, "Şubat": 0, "Mart": 5840, "Nisan": 2920, "Mayıs": 2920, "Haziran": 2920, "Temmuz": 0, "Ağustos": 5840, "Eylül": 1460, "Ekim": 3285, "Kasım": 4927.5, "Aralık": 3285}, "2026": {"Ocak": 3285, "Şubat": 3417, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 23001, "sk": "S", "stokKodu": "1-003-001", "urunKodu": "590018", "tur": "ALÇI", "hammaddeIsmi": "ALÇI 1.90", "stokMiktari": "16050", "hesaplananOptimum": "11500", "terminSuresi": "60", "tuketim": {"2023": {"Ocak": 10800, "Şubat": 9450, "Mart": 10800, "Nisan": 9300, "Mayıs": 10800, "Haziran": 12150, "Temmuz": 12150, "Ağustos": 10800, "Eylül": 9450, "Ekim": 10800, "Kasım": 10800, "Aralık": 15400}, "2024": {"Ocak": 9800, "Şubat": 9350, "Mart": 7950, "Nisan": 6600, "Mayıs": 8100, "Haziran": 6750, "Temmuz": 9450, "Ağustos": 8100, "Eylül": 6250, "Ekim": 5400, "Kasım": 4050, "Aralık": 8100}, "2025": {"Ocak": 9600, "Şubat": 7550, "Mart": 6600, "Nisan": 6750, "Mayıs": 8200, "Haziran": 10950, "Temmuz": 12300, "Ağustos": 9500, "Eylül": 9550, "Ekim": 14150, "Kasım": 13500, "Aralık": 19150}, "2026": {"Ocak": 16200, "Şubat": 12150, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 24001, "sk": "S", "stokKodu": "2708", "urunKodu": "510324", "tur": "KAOLEN", "hammaddeIsmi": "KAOLEN BIP", "stokMiktari": "46095", "hesaplananOptimum": "104535", "terminSuresi": "93", "tuketim": {"2023": {"Ocak": 60910, "Şubat": 44453, "Mart": 13755, "Nisan": 17326, "Mayıs": 59595, "Haziran": 60466, "Temmuz": 43382, "Ağustos": 52470, "Eylül": 53338, "Ekim": 21417, "Kasım": 39382, "Aralık": 34986}, "2024": {"Ocak": 18234, "Şubat": 40862, "Mart": 33948, "Nisan": 32074, "Mayıs": 45639, "Haziran": 40147, "Temmuz": 32040, "Ağustos": 38630, "Eylül": 15800, "Ekim": 27560, "Kasım": 24510, "Aralık": 35770}, "2025": {"Ocak": 8960, "Şubat": 45970, "Mart": 16550, "Nisan": 20705, "Mayıs": 42740, "Haziran": 4290, "Temmuz": 39750, "Ağustos": 26690, "Eylül": 25570, "Ekim": 27810, "Kasım": 14060, "Aralık": 32350}, "2026": {"Ocak": 27405, "Şubat": 19660, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 25001, "sk": "S", "stokKodu": "122", "urunKodu": "520007", "tur": "KİL", "hammaddeIsmi": "HYWITE", "stokMiktari": "237386", "hesaplananOptimum": "50000", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 19536, "Şubat": 13896, "Mart": 5479, "Nisan": 5496, "Mayıs": 17874, "Haziran": 17926, "Temmuz": 13027, "Ağustos": 15730, "Eylül": 15069, "Ekim": 6966, "Kasım": 11469, "Aralık": 10743}, "2024": {"Ocak": 5554, "Şubat": 12483, "Mart": 10971, "Nisan": 9903, "Mayıs": 13797, "Haziran": 12624, "Temmuz": 10131, "Ağustos": 12363, "Eylül": 5484, "Ekim": 9012, "Kasım": 7833, "Aralık": 11808}, "2025": {"Ocak": 2913, "Şubat": 14937, "Mart": 5601, "Nisan": 6897, "Mayıs": 13938, "Haziran": 1620, "Temmuz": 13149, "Ağustos": 8790, "Eylül": 7790, "Ekim": 8746, "Kasım": 5040, "Aralık": 9960}, "2026": {"Ocak": 8985, "Şubat": 6270, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 26001, "sk": "S", "stokKodu": "96", "urunKodu": "550002", "tur": "KALSİT", "hammaddeIsmi": "KALSİT", "stokMiktari": "13202", "hesaplananOptimum": "2500", "terminSuresi": "18", "tuketim": {"2023": {"Ocak": 6772.37, "Şubat": 5909.2, "Mart": 6060, "Nisan": 6326.4, "Mayıs": 6381.6, "Haziran": 5068.2, "Temmuz": 5376.2, "Ağustos": 6120.6, "Eylül": 5358.6, "Ekim": 5969.6, "Kasım": 3584, "Aralık": 6350.8}, "2024": {"Ocak": 5912.8, "Şubat": 5999.67, "Mart": 5995.8, "Nisan": 4777.8, "Mayıs": 5056.75, "Haziran": 3323.2, "Temmuz": 4116.2, "Ağustos": 3465, "Eylül": 2912.6, "Ekim": 3272.75, "Kasım": 3446, "Aralık": 4050}, "2025": {"Ocak": 3730.4, "Şubat": 2508.75, "Mart": 4181.44, "Nisan": 3390.6, "Mayıs": 3312, "Haziran": 2401.12, "Temmuz": 3782.2, "Ağustos": 4615.77, "Eylül": 3584.8, "Ekim": 4064.95, "Kasım": 4513.72, "Aralık": 4536.2}, "2026": {"Ocak": 3397.84, "Şubat": 3598.64, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 27001, "sk": "S", "stokKodu": "1-003-002", "urunKodu": "590019", "tur": "ALÇI", "hammaddeIsmi": "ALÇI 1.43", "stokMiktari": "16810", "hesaplananOptimum": "10000", "terminSuresi": "60", "tuketim": {"2023": {"Ocak": 6000, "Şubat": 8400, "Mart": 11850, "Nisan": 9650, "Mayıs": 9600, "Haziran": 9600, "Temmuz": 12650, "Ağustos": 10800, "Eylül": 10800, "Ekim": 7800, "Kasım": 9450, "Aralık": 8350}, "2024": {"Ocak": 8400, "Şubat": 6650, "Mart": 5250, "Nisan": 5300, "Mayıs": 6750, "Haziran": 5400, "Temmuz": 5400, "Ağustos": 6750, "Eylül": 5400, "Ekim": 4050, "Kasım": 4050, "Aralık": 2700}, "2025": {"Ocak": 4050, "Şubat": 2700, "Mart": 3150, "Nisan": 4500, "Mayıs": 6000, "Haziran": 6000, "Temmuz": 5700, "Ağustos": 5400, "Eylül": 6750, "Ekim": 8100, "Kasım": 5550, "Aralık": 6750}, "2026": {"Ocak": 5400, "Şubat": 5400, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 28001, "sk": "S", "stokKodu": "2382", "urunKodu": "590023", "tur": "BAĞLAYICI", "hammaddeIsmi": "PVA BP20H (ALM – SW)", "stokMiktari": "16399", "hesaplananOptimum": "6959.5", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 3300, "Şubat": 4165, "Mart": 2874, "Nisan": 2685, "Mayıs": 3318, "Haziran": 3005.25, "Temmuz": 2718.5, "Ağustos": 2511.75, "Eylül": 2842.4, "Ekim": 1196, "Kasım": 2903.25, "Aralık": 1555}, "2024": {"Ocak": 1287.5, "Şubat": 2075.5, "Mart": 2037.25, "Nisan": 1707.75, "Mayıs": 2099, "Haziran": 2019, "Temmuz": 1685.5, "Ağustos": 2195, "Eylül": 1466.25, "Ekim": 998.5, "Kasım": 1697, "Aralık": 1721.25}, "2025": {"Ocak": 521.25, "Şubat": 2376.25, "Mart": 1414.5, "Nisan": 816.25, "Mayıs": 2813, "Haziran": 257.25, "Temmuz": 2099.75, "Ağustos": 1559.5, "Eylül": 1687.25, "Ekim": 1721.5, "Kasım": 1067, "Aralık": 2219.25}, "2026": {"Ocak": 1405.25, "Şubat": 1768.25, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 29001, "sk": "S", "stokKodu": "3320", "urunKodu": "590212", "tur": "BAĞLAYICI", "hammaddeIsmi": "ADİCEL V874 (S.P)", "stokMiktari": "3758", "hesaplananOptimum": "2113", "terminSuresi": "120", "tuketim": {"2023": {"Ocak": 772, "Şubat": 187, "Mart": 1501, "Nisan": 2012, "Mayıs": 1890.5, "Haziran": 1452.5, "Temmuz": 1507.5, "Ağustos": 1712.5, "Eylül": 2001.25, "Ekim": 1876.5, "Kasım": 545, "Aralık": 1284.5}, "2024": {"Ocak": 1436, "Şubat": 1343, "Mart": 2198.5, "Nisan": 1424, "Mayıs": 1518.75, "Haziran": 314.25, "Temmuz": 835, "Ağustos": 110, "Eylül": 396.25, "Ekim": 613.75, "Kasım": 531.75, "Aralık": 0}, "2025": {"Ocak": 1240, "Şubat": 0, "Mart": 736.75, "Nisan": 914, "Mayıs": 0, "Haziran": 655, "Temmuz": 0, "Ağustos": 245.5, "Eylül": 434.5, "Ekim": 585.75, "Kasım": 626.25, "Aralık": 371.25}, "2026": {"Ocak": 591.25, "Şubat": 302.5, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 30001, "sk": "S", "stokKodu": "2624", "urunKodu": "570124", "tur": "FRİT", "hammaddeIsmi": "KT-6033", "stokMiktari": "28569", "hesaplananOptimum": "16804.5", "terminSuresi": "63", "tuketim": {"2023": {"Ocak": 14400, "Şubat": 8800, "Mart": 7200, "Nisan": 8800, "Mayıs": 9600, "Haziran": 9600, "Temmuz": 12000, "Ağustos": 9620, "Eylül": 8800, "Ekim": 8000, "Kasım": 8000, "Aralık": 8000}, "2024": {"Ocak": 6400, "Şubat": 8020, "Mart": 8000, "Nisan": 6400, "Mayıs": 6400, "Haziran": 8000, "Temmuz": 6400, "Ağustos": 10400, "Eylül": 3200, "Ekim": 5600, "Kasım": 4800, "Aralık": 9600}, "2025": {"Ocak": 800, "Şubat": 7200, "Mart": 5600, "Nisan": 4020, "Mayıs": 10400, "Haziran": 1600, "Temmuz": 9600, "Ağustos": 8800, "Eylül": 6400, "Ekim": 5600, "Kasım": 6400, "Aralık": 6400}, "2026": {"Ocak": 5600, "Şubat": 4800, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 31001, "sk": "S", "stokKodu": "2433", "urunKodu": "520123", "tur": "BENTONİT", "hammaddeIsmi": "BENTONİT CER-1", "stokMiktari": "3468", "hesaplananOptimum": "2477.5", "terminSuresi": "88", "tuketim": {"2023": {"Ocak": 1383, "Şubat": 1791, "Mart": 1970, "Nisan": 1815.5, "Mayıs": 1682.5, "Haziran": 1328, "Temmuz": 1494.5, "Ağustos": 1229.5, "Eylül": 1893.5, "Ekim": 1642.5, "Kasım": 939.5, "Aralık": 2190.5}, "2024": {"Ocak": 2383, "Şubat": 1303.5, "Mart": 2111, "Nisan": 1379, "Mayıs": 1595, "Haziran": 549.5, "Temmuz": 1583.5, "Ağustos": 140, "Eylül": 1037.5, "Ekim": 904.5, "Kasım": 1055.5, "Aralık": 0}, "2025": {"Ocak": 2166.5, "Şubat": 0, "Mart": 1230.5, "Nisan": 846, "Mayıs": 146, "Haziran": 1208.5, "Temmuz": 36.5, "Ağustos": 589, "Eylül": 533, "Ekim": 1148.4, "Kasım": 1000.5, "Aralık": 589.5}, "2026": {"Ocak": 1035, "Şubat": 561, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 32001, "sk": "S", "stokKodu": "3787", "urunKodu": "590246", "tur": "CAMSUYU", "hammaddeIsmi": "CAMSUYU (ÖZKİMSAN)", "stokMiktari": "3181", "hesaplananOptimum": "2800", "terminSuresi": "68", "tuketim": {"2023": {"Ocak": 1394.7, "Şubat": 1078.82, "Mart": 1554, "Nisan": 1767.6, "Mayıs": 1892.71, "Haziran": 1359.55, "Temmuz": 1210.45, "Ağustos": 1437.43, "Eylül": 1649.76, "Ekim": 1907.05, "Kasım": 1411.33, "Aralık": 2219.24}, "2024": {"Ocak": 2075.59, "Şubat": 1326.9, "Mart": 2219.7, "Nisan": 1350.43, "Mayıs": 1679.48, "Haziran": 395.25, "Temmuz": 1448.83, "Ağustos": 108.4, "Eylül": 838.29, "Ekim": 933.68, "Kasım": 1035.25, "Aralık": 1721.25}, "2025": {"Ocak": 1794.81, "Şubat": 0, "Mart": 1150.08, "Nisan": 941.01, "Mayıs": 0, "Haziran": 1046.42, "Temmuz": 0, "Ağustos": 468.36, "Eylül": 722.87, "Ekim": 1355.95, "Kasım": 797.3, "Aralık": 717.69}, "2026": {"Ocak": 1303.47, "Şubat": 311.94, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 33001, "sk": "S", "stokKodu": "3284", "urunKodu": "550102", "tur": "TALK", "hammaddeIsmi": "NİĞTALK ", "stokMiktari": "13833", "hesaplananOptimum": "6730.5", "terminSuresi": "50", "tuketim": {"2023": {"Ocak": 6955, "Şubat": 6695, "Mart": 6957, "Nisan": 4627, "Mayıs": 6849, "Haziran": 6775, "Temmuz": 5070, "Ağustos": 5405, "Eylül": 5427, "Ekim": 3907, "Kasım": 5050, "Aralık": 3654}, "2024": {"Ocak": 2461, "Şubat": 4380, "Mart": 4346, "Nisan": 3447, "Mayıs": 4599, "Haziran": 4354, "Temmuz": 3450, "Ağustos": 5236, "Eylül": 2517, "Ekim": 3077, "Kasım": 3205, "Aralık": 4082}, "2025": {"Ocak": 971, "Şubat": 5685, "Mart": 1940, "Nisan": 2372, "Mayıs": 5352, "Haziran": 613, "Temmuz": 5106, "Ağustos": 3003, "Eylül": 3180.99, "Ekim": 3156.33, "Kasım": 2290, "Aralık": 4250}, "2026": {"Ocak": 2995, "Şubat": 2539, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 34001, "sk": "K", "stokKodu": "3551", "urunKodu": "550109", "tur": "TALK", "hammaddeIsmi": "GÜLMER TALK", "stokMiktari": "6256", "hesaplananOptimum": "0", "terminSuresi": "15", "tuketim": {"2023": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2024": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2025": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 50, "Aralık": 0}, "2026": {"Ocak": 0, "Şubat": 0, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 35001, "sk": "S", "stokKodu": "1376", "urunKodu": "510115", "tur": "KALSİNE KAOLEN", "hammaddeIsmi": "AS-45", "stokMiktari": "26116", "hesaplananOptimum": "20500", "terminSuresi": "138", "tuketim": {"2023": {"Ocak": 6358.75, "Şubat": 5327.5, "Mart": 6343, "Nisan": 5685, "Mayıs": 5393.5, "Haziran": 4123.5, "Temmuz": 4347.5, "Ağustos": 4428.5, "Eylül": 3667.5, "Ekim": 4777.5, "Kasım": 3147.5, "Aralık": 3667.5}, "2024": {"Ocak": 2350, "Şubat": 4680, "Mart": 5427.5, "Nisan": 3485, "Mayıs": 4190, "Haziran": 3020, "Temmuz": 3125, "Ağustos": 5502.5, "Eylül": 1935, "Ekim": 3347.5, "Kasım": 2125, "Aralık": 6107.71}, "2025": {"Ocak": 825, "Şubat": 4322.52, "Mart": 2898.85, "Nisan": 2587.5, "Mayıs": 5126, "Haziran": 1790, "Temmuz": 6027, "Ağustos": 4940.67, "Eylül": 3080.94, "Ekim": 3448.81, "Kasım": 3435, "Aralık": 4172.5}, "2026": {"Ocak": 3092.5, "Şubat": 3010, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 36001, "sk": "K", "stokKodu": "3645", "urunKodu": "590240", "tur": "ARITMA KİM.", "hammaddeIsmi": "CHEMFLOCK 5100S", "stokMiktari": "0", "hesaplananOptimum": "1800", "terminSuresi": "35", "tuketim": {"2023": {"Ocak": 2000, "Şubat": 0, "Mart": 2500, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2024": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 1200, "Temmuz": 0, "Ağustos": 1200, "Eylül": 1200, "Ekim": 1200, "Kasım": 3600, "Aralık": 2400}, "2025": {"Ocak": 3600, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": "", "Aralık": ""}, "2026": {"Ocak": 0, "Şubat": 0, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 37001, "sk": "S", "stokKodu": "3288", "urunKodu": "590210", "tur": "ZİRKON", "hammaddeIsmi": "ZİRKON CFT-5", "stokMiktari": "3536", "hesaplananOptimum": "1630.5", "terminSuresi": "60", "tuketim": {"2023": {"Ocak": 1332.4, "Şubat": 936, "Mart": 1778, "Nisan": 2245.9, "Mayıs": 1280.9, "Haziran": 1338.5, "Temmuz": 1229.4, "Ağustos": 1327, "Eylül": 836.5, "Ekim": 1953.04, "Kasım": 544.5, "Aralık": 776.6}, "2024": {"Ocak": 45, "Şubat": 1286.5, "Mart": 1101, "Nisan": 945.86, "Mayıs": 545, "Haziran": 255, "Temmuz": 646, "Ağustos": 1101.5, "Eylül": 806.5, "Ekim": 632.5, "Kasım": 485, "Aralık": 1150}, "2025": {"Ocak": 240, "Şubat": 563.5, "Mart": 367.5, "Nisan": 333.5, "Mayıs": 1154.5, "Haziran": 65, "Temmuz": 973, "Ağustos": 973.7, "Eylül": 545, "Ekim": 724.5, "Kasım": 1004.75, "Aralık": 432.5}, "2026": {"Ocak": 108.5, "Şubat": 402.5, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 39001, "sk": "S", "stokKodu": "3522", "urunKodu": "590233", "tur": "ELEKTROLİT", "hammaddeIsmi": "AZELİS AA4140", "stokMiktari": "3655", "hesaplananOptimum": "2196", "terminSuresi": "60", "tuketim": {"2023": {"Ocak": 2011.16, "Şubat": 1951.9, "Mart": 1918, "Nisan": 1416.26, "Mayıs": 1928.32, "Haziran": 1589.71, "Temmuz": 1463.08, "Ağustos": 1732.24, "Eylül": 1438.58, "Ekim": 800.4, "Kasım": 1261.94, "Aralık": 919.06}, "2024": {"Ocak": 688.09, "Şubat": 1465.18, "Mart": 1318.43, "Nisan": 902.62, "Mayıs": 1133.96, "Haziran": 1088.12, "Temmuz": 674.79, "Ağustos": 1602.3, "Eylül": 669.62, "Ekim": 810.4, "Kasım": 736.16, "Aralık": 883.42}, "2025": {"Ocak": 321.56, "Şubat": 1206.44, "Mart": 716.28, "Nisan": 601.87, "Mayıs": 1643.69, "Haziran": 155.88, "Temmuz": 1397.58, "Ağustos": 1087.09, "Eylül": 770.44, "Ekim": 747.93, "Kasım": 519.32, "Aralık": 1020.8}, "2026": {"Ocak": 738.14, "Şubat": 676.06, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 40001, "sk": "S", "stokKodu": "186", "urunKodu": "580005", "tur": "ALM.HİDROOKSİT", "hammaddeIsmi": "AL. HİDROKSİT", "stokMiktari": "1908", "hesaplananOptimum": "437.5", "terminSuresi": "41", "tuketim": {"2023": {"Ocak": 307.5, "Şubat": 307.5, "Mart": 408, "Nisan": 410, "Mayıs": 307.5, "Haziran": 102.5, "Temmuz": 307.5, "Ağustos": 307.5, "Eylül": 512.5, "Ekim": 307.5, "Kasım": 307.5, "Aralık": 307.5}, "2024": {"Ocak": 205, "Şubat": 307.5, "Mart": 307.5, "Nisan": 205, "Mayıs": 307.5, "Haziran": 205, "Temmuz": 205, "Ağustos": 410, "Eylül": 205, "Ekim": 205, "Kasım": 205, "Aralık": 410}, "2025": {"Ocak": 205, "Şubat": 307.5, "Mart": 307.5, "Nisan": 102.5, "Mayıs": 410, "Haziran": 205, "Temmuz": 410, "Ağustos": 205, "Eylül": 102.5, "Ekim": 410, "Kasım": 205, "Aralık": 102.5}, "2026": {"Ocak": 307.5, "Şubat": 205, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 41001, "sk": "S", "stokKodu": "24", "urunKodu": "590002", "tur": "ELEKTROLİT", "hammaddeIsmi": "REOTAN-L", "stokMiktari": "489", "hesaplananOptimum": "78", "terminSuresi": "83", "tuketim": {"2023": {"Ocak": 29.21, "Şubat": 56.77, "Mart": 48.64, "Nisan": 38.56, "Mayıs": 30.8, "Haziran": 35.43, "Temmuz": 20.98, "Ağustos": 27.58, "Eylül": 34.68, "Ekim": 33.6, "Kasım": 28.96, "Aralık": 32.66}, "2024": {"Ocak": 51.51, "Şubat": 31.08, "Mart": 40.55, "Nisan": 26.46, "Mayıs": 32.6, "Haziran": 25.39, "Temmuz": 31.99, "Ağustos": 6.93, "Eylül": 30.87, "Ekim": 24.43, "Kasım": 30.19, "Aralık": 9.14}, "2025": {"Ocak": 54.04, "Şubat": 2.67, "Mart": 35.92, "Nisan": 28.52, "Mayıs": 15.21, "Haziran": 25.56, "Temmuz": 10.2, "Ağustos": 23.65, "Eylül": 23.53, "Ekim": 26.74, "Kasım": 29.77, "Aralık": 23.86}, "2026": {"Ocak": 25.98, "Şubat": 24.72, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 42001, "sk": "S", "stokKodu": "29", "urunKodu": "590007", "tur": "KÖPÜK ÖNLEYİCİ", "hammaddeIsmi": "GR. KÖPÜK ÖN.", "stokMiktari": "155", "hesaplananOptimum": "63", "terminSuresi": "45", "tuketim": {"2023": {"Ocak": 79.75, "Şubat": 85.52, "Mart": 97.9, "Nisan": 78.65, "Mayıs": 83.75, "Haziran": 71.5, "Temmuz": 73.15, "Ağustos": 63.25, "Eylül": 79.89, "Ekim": 47.85, "Kasım": 61.6, "Aralık": 60.5}, "2024": {"Ocak": 63.8, "Şubat": 54.45, "Mart": 69.02, "Nisan": 48.95, "Mayıs": 61.05, "Haziran": 46.75, "Temmuz": 55, "Ağustos": 41.8, "Eylül": 34.92, "Ekim": 30.25, "Kasım": 40.97, "Aralık": 29.15}, "2025": {"Ocak": 31.35, "Şubat": 43.72, "Mart": 36.85, "Nisan": 22.55, "Mayıs": 44.55, "Haziran": 18.7, "Temmuz": 37.4, "Ağustos": 31.9, "Eylül": 40.7, "Ekim": 43.45, "Kasım": 40.7, "Aralık": 65.72}, "2026": {"Ocak": 49.5, "Şubat": 54.17, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 43001, "sk": "S", "stokKodu": "3348", "urunKodu": "581583", "tur": "MANGAN OKSİT", "hammaddeIsmi": "DMR75 SÜREN (MANGAN OKSİT)", "stokMiktari": "300", "hesaplananOptimum": "68.5", "terminSuresi": "41", "tuketim": {"2023": {"Ocak": 87.5, "Şubat": 200, "Mart": 100, "Nisan": 100, "Mayıs": 100, "Haziran": 0, "Temmuz": 100, "Ağustos": 100, "Eylül": 100, "Ekim": 100, "Kasım": 100, "Aralık": 100}, "2024": {"Ocak": 0, "Şubat": 100, "Mart": 200, "Nisan": 100, "Mayıs": 0, "Haziran": 100, "Temmuz": 100, "Ağustos": 0, "Eylül": 100, "Ekim": 100, "Kasım": 0, "Aralık": 0}, "2025": {"Ocak": 0, "Şubat": 0, "Mart": 100, "Nisan": 0, "Mayıs": 100, "Haziran": 0, "Temmuz": 100, "Ağustos": 100, "Eylül": 0, "Ekim": 0, "Kasım": 100, "Aralık": 100}, "2026": {"Ocak": 0, "Şubat": 0, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 46001, "sk": "S", "stokKodu": "26", "urunKodu": "590004", "tur": "SODA", "hammaddeIsmi": "SODA", "stokMiktari": "94", "hesaplananOptimum": "30", "terminSuresi": "63", "tuketim": {"2023": {"Ocak": 10.62, "Şubat": 35.23, "Mart": 21.53, "Nisan": 19.5, "Mayıs": 13.32, "Haziran": 11.32, "Temmuz": 10.19, "Ağustos": 11.06, "Eylül": 19.03, "Ekim": 13.45, "Kasım": 11.91, "Aralık": 12.36}, "2024": {"Ocak": 20.9, "Şubat": 21.77, "Mart": 14.98, "Nisan": 11.26, "Mayıs": 13.01, "Haziran": 10.81, "Temmuz": 18.99, "Ağustos": 0.88, "Eylül": 13.22, "Ekim": 11.06, "Kasım": 15.45, "Aralık": 2.19}, "2025": {"Ocak": 31.92, "Şubat": 0.87, "Mart": 20.09, "Nisan": 10.59, "Mayıs": 0, "Haziran": 11.26, "Temmuz": 1.97, "Ağustos": 16.79, "Eylül": 7.6, "Ekim": 10.82, "Kasım": 12.93, "Aralık": 10.82}, "2026": {"Ocak": 10.39, "Şubat": 10.8, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 48001, "sk": "S", "stokKodu": "2450", "urunKodu": "580826", "tur": "DEMİR OKSİT", "hammaddeIsmi": "DEMİR OKSİT PANOXIDE (580826)", "stokMiktari": "447", "hesaplananOptimum": "21", "terminSuresi": "41", "tuketim": {"2023": {"Ocak": 23, "Şubat": 22, "Mart": 20, "Nisan": 47.35, "Mayıs": 32.75, "Haziran": 12.25, "Temmuz": 26, "Ağustos": 22.7, "Eylül": 14.75, "Ekim": 27, "Kasım": 3, "Aralık": 19}, "2024": {"Ocak": 5, "Şubat": 22.75, "Mart": 25.85, "Nisan": 19.05, "Mayıs": 10.5, "Haziran": 6.75, "Temmuz": 17, "Ağustos": 28.6, "Eylül": 16.55, "Ekim": 12, "Kasım": 4, "Aralık": 18.51}, "2025": {"Ocak": 3, "Şubat": 9, "Mart": 11.63, "Nisan": 3, "Mayıs": 24.5, "Haziran": 3.75, "Temmuz": 10.75, "Ağustos": 21.69, "Eylül": 15.5, "Ekim": 9, "Kasım": 14.7, "Aralık": 4}, "2026": {"Ocak": 3.75, "Şubat": 14, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 50001, "sk": "s", "stokKodu": "2191", "urunKodu": "590145", "tur": "BAĞLAYICI", "hammaddeIsmi": "OPTAPIX CF 12", "stokMiktari": "42", "hesaplananOptimum": "7.5", "terminSuresi": "45", "tuketim": {"2023": {"Ocak": 14.15, "Şubat": 12.45, "Mart": 9.62, "Nisan": 7.92, "Mayıs": 8.49, "Haziran": 9.62, "Temmuz": 7.92, "Ağustos": 7.36, "Eylül": 9.05, "Ekim": 9.05, "Kasım": 6.22, "Aralık": 6.22}, "2024": {"Ocak": 9.05, "Şubat": 7.92, "Mart": 8.49, "Nisan": 9.62, "Mayıs": 6.79, "Haziran": 6.22, "Temmuz": 9.05, "Ağustos": 6.79, "Eylül": 7.36, "Ekim": 5.66, "Kasım": 8.49, "Aralık": 4.52}, "2025": {"Ocak": 7.36, "Şubat": 4.52, "Mart": 5.66, "Nisan": 5.66, "Mayıs": 5.66, "Haziran": 6.22, "Temmuz": 3.96, "Ağustos": 4.52, "Eylül": 6.22, "Ekim": 5.66, "Kasım": 4.52, "Aralık": 6.79}, "2026": {"Ocak": 3.96, "Şubat": 5.66, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 52001, "sk": "S", "stokKodu": "3152", "urunKodu": "590207", "tur": "PLASTİKLEŞTİRİCİ", "hammaddeIsmi": "ZUSOPLAST 9002", "stokMiktari": "76", "hesaplananOptimum": "228", "terminSuresi": "78", "tuketim": {"2023": {"Ocak": 14.23, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 13.75, "Haziran": 210.37, "Temmuz": 227.15, "Ağustos": 197.15, "Eylül": 247.19, "Ekim": 88.5, "Kasım": 226.05, "Aralık": 126.25}, "2024": {"Ocak": 133.69, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 148.35, "Temmuz": 168.55, "Ağustos": 219.5, "Eylül": 146.62, "Ekim": 99.85, "Kasım": 169.7, "Aralık": 172.12}, "2025": {"Ocak": 52.12, "Şubat": 237.62, "Mart": 141.45, "Nisan": 81.62, "Mayıs": 262.17, "Haziran": 18.97, "Temmuz": 165.42, "Ağustos": 127.6, "Eylül": 168.72, "Ekim": 172.15, "Kasım": 109.17, "Aralık": 221.92}, "2026": {"Ocak": 140.53, "Şubat": 176.82, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 53001, "sk": "K", "stokKodu": "3719", "urunKodu": "590243", "tur": "PLASTİKLEŞTİRİCİ", "hammaddeIsmi": "(ZUSOPLAST) BAS-PLAST 0010", "stokMiktari": "32", "hesaplananOptimum": "", "terminSuresi": "23", "tuketim": {"2023": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 0, "Haziran": 0, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2024": {"Ocak": 88.02, "Şubat": 207.55, "Mart": 203.72, "Nisan": 154.27, "Mayıs": 209.9, "Haziran": 53.55, "Temmuz": 0, "Ağustos": 0, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2025": {"Ocak": 0, "Şubat": 0, "Mart": 0, "Nisan": 0, "Mayıs": 21.6, "Haziran": 6.75, "Temmuz": 44.55, "Ağustos": 28.35, "Eylül": 0, "Ekim": 0, "Kasım": 0, "Aralık": 0}, "2026": {"Ocak": 0, "Şubat": 0, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}, {"id": 54001, "sk": "S", "stokKodu": "1296", "urunKodu": "580811", "tur": "BÜNYE BOYASI", "hammaddeIsmi": "MALACHITE GREEN POWDER", "stokMiktari": "22", "hesaplananOptimum": "5", "terminSuresi": "22", "tuketim": {"2023": {"Ocak": 6.76, "Şubat": 5.6, "Mart": 2.34, "Nisan": 2.3, "Mayıs": 6.51, "Haziran": 6.51, "Temmuz": 4.61, "Ağustos": 5.73, "Eylül": 5.72, "Ekim": 2.63, "Kasım": 4.23, "Aralık": 3.97}, "2024": {"Ocak": 2.25, "Şubat": 4.81, "Mart": 4.05, "Nisan": 3.67, "Mayıs": 5.06, "Haziran": 4.64, "Temmuz": 3.9, "Ağustos": 4.4, "Eylül": 2.1, "Ekim": 3.36, "Kasım": 3.01, "Aralık": 4.21}, "2025": {"Ocak": 1.54, "Şubat": 5.32, "Mart": 2.28, "Nisan": 2.6, "Mayıs": 5.11, "Haziran": 0.72, "Temmuz": 4.68, "Ağustos": 3.42, "Eylül": 2.84, "Ekim": 3.24, "Kasım": 2.01, "Aralık": 3.69}, "2026": {"Ocak": 3.35, "Şubat": 2.52, "Mart": "", "Nisan": "", "Mayıs": "", "Haziran": "", "Temmuz": "", "Ağustos": "", "Eylül": "", "Ekim": "", "Kasım": "", "Aralık": ""}}}];
+
+const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const YILLAR = [2023, 2024, 2025, 2026];
+const TUR_LISTESI = ["KUVARS","KAOLEN","FELDSPAT","ALBİT","KİL","K.ALUMİNA","TALKİT","DOLOMİT","DİĞER"];
+
+const bos_tuketim = () => {
+  const obj = {};
+  YILLAR.forEach(y => {
+    obj[y] = {};
+    AYLAR.forEach(a => { obj[y][a] = ""; });
+  });
+  return obj;
+};
+
+const bos_form = () => ({
+  sk: "S",
+  stokKodu: "",
+  urunKodu: "",
+  tur: "",
+  hammaddeIsmi: "",
+  tedarikci: "",
+  stokMiktari: "",
+  hesaplananOptimum: "",
+  terminSuresi: "",
+  tuketim: bos_tuketim()
+});
+
+// Yardımcı: ortalama hesapla
+const hesaplaOrt = (tuketim, yil) => {
+  const vals = AYLAR.map(a=>parseFloat(tuketim[String(yil)]?.[a])).filter(v=>!isNaN(v)&&v>0);
+  return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : 0;
+};
+const son12AyOrt = (tuketim) => {
+  // 2026 Ocak+Şubat + 2025'in son 10 ayı
+  const aylar2026 = ["Ocak","Şubat"].map(a=>parseFloat(tuketim["2026"]?.[a])).filter(v=>!isNaN(v)&&v>0);
+  const aylar2025 = AYLAR.slice(aylar2026.length > 0 ? 12-(12-aylar2026.length) : 0).map(a=>parseFloat(tuketim["2025"]?.[a])).filter(v=>!isNaN(v)&&v>0);
+  // Basit: 2025 tüm aylar + 2026 ocak-şubat, son 12'yi al
+  const tumAylar = [
+    ...AYLAR.map(a=>({y:"2025",a,v:parseFloat(tuketim["2025"]?.[a])})),
+    ...["Ocak","Şubat"].map(a=>({y:"2026",a,v:parseFloat(tuketim["2026"]?.[a])}))
+  ].filter(x=>!isNaN(x.v)&&x.v>0).slice(-12);
+  return tumAylar.length ? tumAylar.reduce((s,x)=>s+x.v,0)/tumAylar.length : 0;
+};
+const son3AyOrt = (tuketim) => {
+  const tumAylar = [
+    ...AYLAR.map(a=>({v:parseFloat(tuketim["2025"]?.[a])})),
+    ...["Ocak","Şubat"].map(a=>({v:parseFloat(tuketim["2026"]?.[a])}))
+  ].filter(x=>!isNaN(x.v)&&x.v>0).slice(-3);
+  return tumAylar.length ? tumAylar.reduce((s,x)=>s+x.v,0)/tumAylar.length : 0;
+};
+
+const YIL_RENKLER = {
+  2023: { bg:"#1a2535", border:"#3b82f6", text:"#60a5fa", dot:"#3b82f6" },
+  2024: { bg:"#1a2535", border:"#8b5cf6", text:"#a78bfa", dot:"#8b5cf6" },
+  2025: { bg:"#1a2535", border:"#10b981", text:"#34d399", dot:"#10b981" },
+  2026: { bg:"#1a2535", border:"#f59e0b", text:"#fbbf24", dot:"#f59e0b" },
+};
+
+function FormAlani({ label, children, zorunlu }) {
+  return (
+    <div>
+      <label className="field-label">{label}{zorunlu && <span style={{color:"#ef4444",marginLeft:3}}>*</span>}</label>
+      {children}
+    </div>
+  );
+}
+
+function HammaddeForm({ form, onChange, onKaydet, onIptal, duzenleMode }) {
+  const [aktifYil, setAktifYil] = useState(2025);
+
+  const setField = (key, val) => onChange({ ...form, [key]: val });
+  const setTuketim = (yil, ay, val) => {
+    const t = { ...form.tuketim, [yil]: { ...form.tuketim[yil], [ay]: val } };
+    onChange({ ...form, tuketim: t });
+  };
+
+  const yilOrt = (yil) => {
+    const vals = AYLAR.map(a => parseFloat(form.tuketim[yil][a])).filter(v => !isNaN(v) && v > 0);
+    if (!vals.length) return null;
+    return (vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(0);
+  };
+
+  return (
+    <div style={{animation:"fadeIn 0.3s"}}>
+      {/* Temel Bilgiler */}
+      <div className="card" style={{marginBottom:16}}>
+        <div className="section-title">📋 Temel Bilgiler</div>
+        <div style={{display:"grid", gridTemplateColumns:"100px 1fr 1fr 1fr 2fr 1fr", gap:14, marginBottom:14}}>
+          <FormAlani label="S / K" zorunlu>
+            <select className="field-input" value={form.sk} onChange={e=>setField("sk",e.target.value)}>
+              <option value="S">S — Standart</option>
+              <option value="K">K — Kapalı</option>
+            </select>
+          </FormAlani>
+          <FormAlani label="Stok Kodu" zorunlu>
+            <input className="field-input" type="text" placeholder="ör: 16" value={form.stokKodu} onChange={e=>setField("stokKodu",e.target.value)}/>
+          </FormAlani>
+          <FormAlani label="Ürün Kodu" zorunlu>
+            <input className="field-input" type="text" placeholder="ör: 540004" value={form.urunKodu} onChange={e=>setField("urunKodu",e.target.value)}/>
+          </FormAlani>
+          <FormAlani label="Tür" zorunlu>
+            <select className="field-input" value={form.tur} onChange={e=>setField("tur",e.target.value)}>
+              <option value="">-- Seçin --</option>
+              {TUR_LISTESI.map(t=><option key={t}>{t}</option>)}
+            </select>
+          </FormAlani>
+          <FormAlani label="Hammadde İsmi" zorunlu>
+            <input className="field-input" type="text" placeholder="ör: KUVARS 45M MATEL – ALM." value={form.hammaddeIsmi} onChange={e=>setField("hammaddeIsmi",e.target.value)}/>
+          </FormAlani>
+          <FormAlani label="Tedarikçi">
+            <input className="field-input" type="text" placeholder="ör: MATEL A.Ş." value={form.tedarikci||""} onChange={e=>setField("tedarikci",e.target.value)}/>
+          </FormAlani>
+        </div>
+        <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:14}}>
+          <FormAlani label="Stok Miktarı (kg)">
+            <input className="field-input" type="number" placeholder="0" value={form.stokMiktari} onChange={e=>setField("stokMiktari",e.target.value)}/>
+          </FormAlani>
+          <FormAlani label="Hesaplanan Optimum">
+            <input className="field-input" type="number" placeholder="0" value={form.hesaplananOptimum} onChange={e=>setField("hesaplananOptimum",e.target.value)}/>
+          </FormAlani>
+          <FormAlani label="Termin Süresi (gün)">
+            <input className="field-input" type="number" placeholder="ör: 20" value={form.terminSuresi} onChange={e=>setField("terminSuresi",e.target.value)}/>
+          </FormAlani>
+        </div>
+      </div>
+
+      {/* Tüketim Tablosu */}
+      <div className="card">
+        <div className="section-title">📅 Yıllara & Aylara Göre Tüketim Miktarları</div>
+
+        {/* Yıl Sekmeleri */}
+        <div style={{display:"flex", gap:8, marginBottom:18}}>
+          {YILLAR.map(y => {
+            const ort = yilOrt(y);
+            const renk = YIL_RENKLER[y];
+            return (
+              <button key={y} onClick={()=>setAktifYil(y)} style={{
+                padding:"8px 18px", borderRadius:8, border:`2px solid`,
+                borderColor: aktifYil===y ? renk.border : "#1e2430",
+                background: aktifYil===y ? renk.bg : "transparent",
+                color: aktifYil===y ? renk.text : "#4b5563",
+                cursor:"pointer", fontWeight:700, fontSize:13,
+                display:"flex", alignItems:"center", gap:8, transition:"all 0.2s"
+              }}>
+                <span style={{width:8,height:8,borderRadius:"50%",background:aktifYil===y?renk.dot:"#374151",display:"inline-block"}}/>
+                {y}
+                {ort && <span style={{fontSize:11,opacity:0.75}}>ort: {Number(ort).toLocaleString("tr-TR")}</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Ay Girişleri */}
+        <div style={{animation:"fadeIn 0.2s"}}>
+          <div style={{
+            display:"inline-block", padding:"4px 12px", borderRadius:6, marginBottom:14,
+            background: YIL_RENKLER[aktifYil].bg,
+            border: `1px solid ${YIL_RENKLER[aktifYil].border}33`
+          }}>
+            <span className="year-header" style={{color:YIL_RENKLER[aktifYil].text}}>
+              {aktifYil} Tüketim Verileri
+            </span>
+          </div>
+          <div style={{display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:10}}>
+            {AYLAR.map(ay => (
+              <div key={ay}>
+                <label style={{display:"block",fontSize:11,color:"#4b5563",marginBottom:4,textAlign:"center",fontWeight:600}}>{ay}</label>
+                <input
+                  className="month-input"
+                  type="number"
+                  placeholder="—"
+                  value={form.tuketim[aktifYil][ay]}
+                  onChange={e=>setTuketim(aktifYil, ay, e.target.value)}
+                  style={{borderColor: YIL_RENKLER[aktifYil].border+"44"}}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Yıl özet satırı */}
+          <div style={{marginTop:16, background:"#0f1117", borderRadius:8, padding:"12px 16px", display:"flex", gap:24, flexWrap:"wrap"}}>
+            {(() => {
+              const vals = AYLAR.map(a=>parseFloat(form.tuketim[aktifYil][a])).filter(v=>!isNaN(v)&&v>0);
+              const toplam = vals.reduce((s,v)=>s+v,0);
+              const ort = vals.length ? (toplam/vals.length) : 0;
+              const maks = vals.length ? Math.max(...vals) : 0;
+              const girilenAy = vals.length;
+              return (
+                <>
+                  <div><span style={{fontSize:11,color:"#4b5563"}}>Girilen Ay</span><div style={{fontWeight:700,color:"#f1f5f9"}}>{girilenAy} / 12</div></div>
+                  <div><span style={{fontSize:11,color:"#4b5563"}}>Toplam</span><div style={{fontWeight:700,color:YIL_RENKLER[aktifYil].text}}>{toplam.toLocaleString("tr-TR")}</div></div>
+                  <div><span style={{fontSize:11,color:"#4b5563"}}>Ortalama</span><div style={{fontWeight:700,color:"#f1f5f9"}}>{ort.toLocaleString("tr-TR",{maximumFractionDigits:0})}</div></div>
+                  <div><span style={{fontSize:11,color:"#4b5563"}}>En Yüksek</span><div style={{fontWeight:700,color:"#f1f5f9"}}>{maks.toLocaleString("tr-TR")}</div></div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      </div>
+
+      {/* Kaydet / İptal */}
+      <div style={{display:"flex", gap:10, marginTop:16, justifyContent:"flex-end"}}>
+        <button className="btn-secondary" onClick={onIptal}>İptal</button>
+        <button className="btn-primary" onClick={onKaydet}>
+          {duzenleMode ? "✏️ Güncelle" : "💾 Kaydet"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [liste, setListe] = useState(EXCEL_VERISI);
+  const [ekran, setEkran] = useState("liste"); // liste | form | detay | ihtiyac
+  const [form, setForm] = useState(bos_form());
+  const [duzenleId, setDuzenleId] = useState(null);
+  const [detayId, setDetayId] = useState(null);
+  const [bildirim, setBildirim] = useState(null);
+  const [arama, setArama] = useState("");
+  const [filtreSK, setFiltreSK] = useState("Tümü");
+  const [filtreTur, setFiltreTur] = useState("Tümü");
+
+  const goster = (mesaj, tip="basari") => {
+    setBildirim({mesaj,tip});
+    setTimeout(()=>setBildirim(null), 3000);
+  };
+
+  const yeniForm = () => {
+    setDuzenleId(null);
+    setForm(bos_form());
+    setEkran("form");
+  };
+
+  const duzenle = (m) => {
+    setDuzenleId(m.id);
+    setForm({...m});
+    setEkran("form");
+  };
+
+  const kaydet = () => {
+    if (!form.stokKodu || !form.hammaddeIsmi) {
+      goster("Stok Kodu ve Hammadde İsmi zorunludur!","hata");
+      return;
+    }
+    if (duzenleId) {
+      setListe(p=>p.map(m=>m.id===duzenleId?{...form,id:duzenleId}:m));
+      goster("Hammadde güncellendi.");
+    } else {
+      setListe(p=>[...p,{...form,id:Date.now()}]);
+      goster("Hammadde eklendi.");
+    }
+    setEkran("liste");
+  };
+
+  const sil = (id) => {
+    setListe(p=>p.filter(m=>m.id!==id));
+    goster("Silindi.","uyari");
+  };
+
+  const detay = (m) => { setDetayId(m.id); setEkran("detay"); };
+
+  const filtreliListe = useMemo(()=>liste.filter(m=>{
+    const aramaOk = m.hammaddeIsmi.toLowerCase().includes(arama.toLowerCase()) ||
+      m.stokKodu.toString().includes(arama) || m.tur.toLowerCase().includes(arama.toLowerCase());
+    const skOk = filtreSK==="Tümü" || m.sk===filtreSK;
+    const turOk = filtreTur==="Tümü" || m.tur===filtreTur;
+    return aramaOk && skOk && turOk;
+  }), [liste, arama, filtreSK, filtreTur]);
+
+  const detayM = liste.find(m=>m.id===detayId);
+
+  return (
+    <div style={{minHeight:"100vh"}}>
+      {/* Bildirim */}
+      {bildirim && (
+        <div style={{position:"fixed",top:20,right:20,zIndex:9999,
+          background:bildirim.tip==="basari"?"#10b981":bildirim.tip==="hata"?"#ef4444":"#f59e0b",
+          color:"#fff",padding:"11px 20px",borderRadius:8,fontWeight:700,
+          boxShadow:"0 4px 20px rgba(0,0,0,0.5)",animation:"slideIn 0.3s",fontSize:14}}>
+          {bildirim.mesaj}
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{borderBottom:"1px solid #1e2430",padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60,background:"#0d1017",position:"sticky",top:0,zIndex:100}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:34,height:34,background:"linear-gradient(135deg,#3b82f6,#6366f1)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>⬡</div>
+          <div>
+            <div style={{fontSize:15,fontWeight:700,color:"#f1f5f9",letterSpacing:"0.03em"}}>HAMMADDE TAKİP</div>
+            <div style={{fontSize:10,color:"#475569",letterSpacing:"0.06em"}}>VERİ GİRİŞ SİSTEMİ</div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {/* Nav sekmeleri */}
+          {["liste","ihtiyac","istatistik"].map(e => {
+            const labels = {liste:"📋 Tüm Liste", ihtiyac:"⚠️ İhtiyaç Listesi", istatistik:"📊 İstatistikler"};
+            const kritikSay = liste.filter(m=>parseFloat(m.stokMiktari)>0 && parseFloat(m.hesaplananOptimum)>0 && parseFloat(m.stokMiktari)<parseFloat(m.hesaplananOptimum)).length;
+            return (
+              <button key={e} onClick={()=>setEkran(e)} style={{
+                padding:"7px 16px", borderRadius:7, border:"1px solid",
+                borderColor: ekran===e ? (e==="ihtiyac"?"#f59e0b":e==="istatistik"?"#10b981":"#3b82f6") : "#1e2430",
+                background: ekran===e ? (e==="ihtiyac"?"#2a1f0a":e==="istatistik"?"#0d2018":"#1d3557") : "transparent",
+                color: ekran===e ? (e==="ihtiyac"?"#fbbf24":e==="istatistik"?"#34d399":"#60a5fa") : "#64748b",
+                cursor:"pointer", fontWeight:700, fontSize:12, display:"flex", alignItems:"center", gap:6
+              }}>
+                {labels[e]}
+                {e==="ihtiyac" && kritikSay>0 && (
+                  <span style={{background:"#ef4444",color:"#fff",borderRadius:"50%",width:18,height:18,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700}}>{kritikSay}</span>
+                )}
+              </button>
+            );
+          })}
+          <div style={{width:1,height:24,background:"#1e2430",margin:"0 4px"}}/>
+          <span style={{fontSize:12,color:"#475569"}}>{liste.length} kayıt</span>
+          {ekran!=="form" && (
+            <button className="btn-primary" onClick={yeniForm}>+ Yeni Hammadde</button>
+          )}
+          {(ekran==="form"||ekran==="detay") && (
+            <button className="btn-secondary" onClick={()=>setEkran("liste")}>← Listeye Dön</button>
+          )}
+        </div>
+      </div>
+
+      <div style={{padding:"24px 28px", maxWidth:1400, margin:"0 auto"}}>
+
+        {/* LİSTE EKRANI */}
+        {ekran==="liste" && (
+          <div style={{animation:"fadeIn 0.3s"}}>
+            <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
+              <input
+                placeholder="🔍  Hammadde, stok kodu veya tür ara..."
+                value={arama} onChange={e=>setArama(e.target.value)}
+                style={{...{},flex:1,minWidth:220,background:"#141820",border:"1px solid #1e2430",borderRadius:8,padding:"9px 14px",color:"#e2e8f0",fontSize:13,outline:"none"}}
+              />
+              <div style={{display:"flex",gap:6}}>
+                {["Tümü","S","K"].map(v=>(
+                  <button key={v} onClick={()=>setFiltreSK(v)} style={{
+                    padding:"8px 14px",borderRadius:6,border:"1px solid",fontSize:12,fontWeight:600,cursor:"pointer",
+                    borderColor:filtreSK===v?"#3b82f6":"#1e2430",
+                    background:filtreSK===v?"#1d3557":"#141820",
+                    color:filtreSK===v?"#60a5fa":"#64748b"
+                  }}>{v==="Tümü"?"Tümü":v==="S"?"S — Standart":"K — Kapalı"}</button>
+                ))}
+              </div>
+              <select value={filtreTur} onChange={e=>setFiltreTur(e.target.value)}
+                style={{background:"#141820",border:"1px solid #1e2430",borderRadius:8,padding:"8px 12px",color:"#94a3b8",fontSize:12,outline:"none"}}>
+                <option value="Tümü">Tüm Türler</option>
+                {TUR_LISTESI.map(t=><option key={t}>{t}</option>)}
+              </select>
+            </div>
+
+            {filtreliListe.length === 0 ? (
+              <div style={{textAlign:"center",padding:"80px 0",color:"#334155"}}>
+                <div style={{fontSize:48,marginBottom:16}}>📦</div>
+                <div style={{fontSize:16,marginBottom:8,color:"#475569"}}>Henüz hammadde eklenmedi</div>
+                <div style={{fontSize:13,color:"#334155",marginBottom:24}}>Sağ üstteki "Yeni Hammadde" butonuyla başlayın</div>
+                <button className="btn-primary" onClick={yeniForm}>+ İlk Hammaddeyi Ekle</button>
+              </div>
+            ) : (
+              <div style={{background:"#141820",border:"1px solid #1e2430",borderRadius:12,overflow:"hidden"}}>
+                <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",minWidth:1200}}>
+                  <thead>
+                    <tr style={{background:"#0d1017",borderBottom:"1px solid #1e2430"}}>
+                      {["S/K","Stok Kodu","Ürün Kodu","Tür","Hammadde İsmi / Tedarikçi","Stok Miktarı","Optimum","Termin","2023 Ort.","2024 Ort.","2025 Ort.","Son 12 Ay","Son 3 Ay","İşlem"].map(h=>(
+                        <th key={h} style={{padding:"11px 12px",textAlign:"left",fontSize:10,color:"#475569",letterSpacing:"0.07em",fontWeight:700,whiteSpace:"nowrap"}}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtreliListe.map(m=>{
+                      const ort = (yil) => {
+                        const vals = AYLAR.map(a=>parseFloat(m.tuketim[String(yil)]?.[a])).filter(v=>!isNaN(v)&&v>0);
+                        return vals.length ? Math.round(vals.reduce((s,v)=>s+v,0)/vals.length) : 0;
+                      };
+                      const s12 = Math.round(son12AyOrt(m.tuketim));
+                      const s3  = Math.round(son3AyOrt(m.tuketim));
+                      const stokDusuk = parseFloat(m.stokMiktari) < parseFloat(m.hesaplananOptimum);
+                      return (
+                        <tr key={m.id} style={{borderBottom:"1px solid #1e2430",cursor:"default"}}
+                          onMouseEnter={e=>e.currentTarget.style.background="#1a2130"}
+                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                          <td style={{padding:"11px 12px"}}>
+                            <span style={{padding:"3px 9px",borderRadius:5,fontSize:11,fontWeight:700,background:m.sk==="S"?"#1d3557":"#2d1a1a",color:m.sk==="S"?"#60a5fa":"#f87171",border:`1px solid ${m.sk==="S"?"#3b82f633":"#ef444433"}`}}>{m.sk}</span>
+                          </td>
+                          <td style={{padding:"11px 12px",color:"#94a3b8",fontSize:12,fontFamily:"monospace"}}>{m.stokKodu}</td>
+                          <td style={{padding:"11px 12px",color:"#64748b",fontSize:12,fontFamily:"monospace"}}>{m.urunKodu}</td>
+                          <td style={{padding:"11px 12px"}}><span style={{background:"#1e2430",padding:"2px 8px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.tur}</span></td>
+                          <td style={{padding:"11px 12px",maxWidth:220}}>
+                            <div style={{fontWeight:600,color:"#f1f5f9",fontSize:13}}>{m.hammaddeIsmi}</div>
+                            {m.tedarikci && <div style={{fontSize:11,color:"#475569",marginTop:2}}>🏭 {m.tedarikci}</div>}
+                          </td>
+                          <td style={{padding:"11px 12px",fontWeight:700,fontSize:13,color:stokDusuk?"#f87171":"#34d399"}}>
+                            {m.stokMiktari?Number(m.stokMiktari).toLocaleString("tr-TR"):"—"}
+                            {stokDusuk && <span style={{fontSize:9,marginLeft:4,background:"#ef444422",color:"#f87171",padding:"1px 5px",borderRadius:3,border:"1px solid #ef444433"}}>↓OPT</span>}
+                          </td>
+                          <td style={{padding:"11px 12px",color:"#94a3b8",fontSize:12}}>{m.hesaplananOptimum?Number(m.hesaplananOptimum).toLocaleString("tr-TR"):"—"}</td>
+                          <td style={{padding:"11px 12px",color:"#64748b",fontSize:12,textAlign:"center"}}>{m.terminSuresi||"—"}</td>
+                          <td style={{padding:"11px 12px",color:"#60a5fa",fontSize:12,textAlign:"right",fontFamily:"monospace"}}>{ort(2023).toLocaleString("tr-TR")}</td>
+                          <td style={{padding:"11px 12px",color:"#a78bfa",fontSize:12,textAlign:"right",fontFamily:"monospace"}}>{ort(2024).toLocaleString("tr-TR")}</td>
+                          <td style={{padding:"11px 12px",color:"#34d399",fontSize:12,textAlign:"right",fontFamily:"monospace"}}>{ort(2025).toLocaleString("tr-TR")}</td>
+                          <td style={{padding:"11px 12px",fontSize:12,textAlign:"right",fontFamily:"monospace"}}>
+                            <span style={{color:"#fbbf24",fontWeight:600}}>{s12>0?s12.toLocaleString("tr-TR"):"—"}</span>
+                          </td>
+                          <td style={{padding:"11px 12px",fontSize:12,textAlign:"right",fontFamily:"monospace"}}>
+                            <span style={{color:"#fb923c",fontWeight:600}}>{s3>0?s3.toLocaleString("tr-TR"):"—"}</span>
+                          </td>
+                          <td style={{padding:"11px 12px"}}>
+                            <div style={{display:"flex",gap:5}}>
+                              <button onClick={()=>detay(m)} title="Detay" style={{background:"#1e2430",border:"none",borderRadius:6,padding:"5px 8px",cursor:"pointer",fontSize:13}}>👁</button>
+                              <button onClick={()=>duzenle(m)} title="Düzenle" style={{background:"#1e2430",border:"none",borderRadius:6,padding:"5px 8px",cursor:"pointer",fontSize:13}}>✏️</button>
+                              <button onClick={()=>sil(m.id)} className="btn-danger" title="Sil" style={{padding:"5px 8px",fontSize:13}}>🗑️</button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FORM EKRANI */}
+        {ekran==="form" && (
+          <div>
+            <div style={{marginBottom:20}}>
+              <h2 style={{fontSize:20,fontWeight:700,color:"#f1f5f9"}}>{duzenleId?"✏️ Hammadde Düzenle":"➕ Yeni Hammadde Ekle"}</h2>
+              <p style={{color:"#475569",fontSize:13,marginTop:4}}>Zorunlu alanları (*) doldurun, tüketim verilerini yıl sekmelerinden girin.</p>
+            </div>
+            <HammaddeForm
+              form={form}
+              onChange={setForm}
+              onKaydet={kaydet}
+              onIptal={()=>setEkran("liste")}
+              duzenleMode={!!duzenleId}
+            />
+          </div>
+        )}
+
+        {/* İSTATİSTİKLER EKRANI */}
+        {ekran==="istatistik" && (()=>{
+          const N = (v,d=0) => isNaN(v)||!v ? "—" : Number(v).toLocaleString("tr-TR",{maximumFractionDigits:d});
+
+          // Genel toplamlar
+          const toplamStok = liste.reduce((s,m)=>s+(parseFloat(m.stokMiktari)||0),0);
+          const ihtiyacSay = liste.filter(m=>parseFloat(m.stokMiktari)<parseFloat(m.hesaplananOptimum)&&parseFloat(m.hesaplananOptimum)>0).length;
+
+          // Yıllara göre toplam tüketim
+          const yilToplam = {};
+          YILLAR.forEach(y=>{
+            yilToplam[y] = liste.reduce((s,m)=>{
+              const vals = AYLAR.map(a=>parseFloat(m.tuketim[String(y)]?.[a])||0);
+              return s + vals.reduce((a,b)=>a+b,0);
+            },0);
+          });
+          const yilOrtToplamlar = {};
+          YILLAR.forEach(y=>{
+            const ayBas = liste.reduce((s,m)=>{
+              const vals = AYLAR.map(a=>parseFloat(m.tuketim[String(y)]?.[a])).filter(v=>!isNaN(v)&&v>0);
+              return s+(vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0);
+            },0);
+            yilOrtToplamlar[y] = ayBas;
+          });
+
+          // Tür bazlı istatistik
+          const turler = [...new Set(liste.map(m=>m.tur).filter(Boolean))];
+          const turStats = turler.map(tur=>{
+            const malz = liste.filter(m=>m.tur===tur);
+            const ort2025 = malz.reduce((s,m)=>s+hesaplaOrt(m.tuketim,2025),0);
+            const ort2024 = malz.reduce((s,m)=>s+hesaplaOrt(m.tuketim,2024),0);
+            const s12 = malz.reduce((s,m)=>s+son12AyOrt(m.tuketim),0);
+            return {tur, sayi:malz.length, ort2025, ort2024, s12};
+          }).sort((a,b)=>b.ort2025-a.ort2025);
+
+          // Her hammadde için yıllık istatistik
+          const hammaddeStats = liste.map(m=>{
+            const o23=hesaplaOrt(m.tuketim,2023), o24=hesaplaOrt(m.tuketim,2024), o25=hesaplaOrt(m.tuketim,2025);
+            const s12=son12AyOrt(m.tuketim), s3=son3AyOrt(m.tuketim);
+            const trend = o24>0 ? ((o25-o24)/o24*100) : null;
+            return {...m, o23,o24,o25,s12,s3,trend};
+          }).sort((a,b)=>b.o25-a.o25);
+
+          const maxO25 = Math.max(...hammaddeStats.map(m=>m.o25));
+
+          return (
+            <div style={{animation:"fadeIn 0.3s"}}>
+              <div style={{marginBottom:20}}>
+                <h2 style={{fontSize:22,fontWeight:700,color:"#f1f5f9",marginBottom:4}}>📊 İstatistikler</h2>
+                <p style={{color:"#475569",fontSize:13}}>Yıllara ve hammaddelere göre tüketim analizleri</p>
+              </div>
+
+              {/* Genel özet kartlar */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:24}}>
+                {[
+                  {label:"Toplam Hammadde",val:liste.length+" kalem",renk:"#3b82f6",bg:"#1d3557",icon:"📦"},
+                  {label:"Toplam Stok",val:N(toplamStok)+" kg",renk:"#10b981",bg:"#0d2018",icon:"🏭"},
+                  {label:"İhtiyaç Durumunda",val:ihtiyacSay+" kalem",renk:"#f59e0b",bg:"#2a1f0a",icon:"⚠️"},
+                  {label:"2025 Aylık Ort. Toplam",val:N(yilOrtToplamlar[2025]),renk:"#8b5cf6",bg:"#1e1535",icon:"📈"},
+                ].map((k,i)=>(
+                  <div key={i} style={{background:k.bg,border:`1px solid ${k.renk}44`,borderRadius:12,padding:18,borderTop:`3px solid ${k.renk}`}}>
+                    <div style={{fontSize:22,marginBottom:8}}>{k.icon}</div>
+                    <div style={{fontSize:20,fontWeight:700,color:k.renk}}>{k.val}</div>
+                    <div style={{fontSize:11,color:"#64748b",marginTop:4}}>{k.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Yıllara göre toplam tüketim */}
+              <div style={{background:"#141820",border:"1px solid #1e2430",borderRadius:12,padding:20,marginBottom:20}}>
+                <div style={{fontSize:12,fontWeight:700,letterSpacing:"0.1em",color:"#64748b",marginBottom:16,textTransform:"uppercase"}}>Yıllara Göre Toplam Tüketim</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
+                  {YILLAR.map(y=>{
+                    const renk = YIL_RENKLER[y];
+                    const maxYil = Math.max(...YILLAR.map(yy=>yilToplam[yy]||0));
+                    const yuzde = maxYil>0?Math.round((yilToplam[y]||0)/maxYil*100):0;
+                    return (
+                      <div key={y} style={{background:"#0f1117",borderRadius:10,padding:16,border:`1px solid ${renk.border}33`}}>
+                        <div style={{fontSize:13,fontWeight:700,color:renk.text,marginBottom:12}}>{y}</div>
+                        <div style={{fontSize:22,fontWeight:700,color:"#f1f5f9",marginBottom:4}}>{N(yilToplam[y])}</div>
+                        <div style={{fontSize:11,color:"#475569",marginBottom:10}}>Aylık ort: {N(yilOrtToplamlar[y])}</div>
+                        <div style={{height:6,background:"#1e2430",borderRadius:3}}>
+                          <div style={{width:`${yuzde}%`,height:"100%",background:renk.border,borderRadius:3,transition:"width 0.6s"}}/>
+                        </div>
+                        <div style={{fontSize:10,color:"#475569",marginTop:4}}>%{yuzde} (max'a göre)</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Tür bazlı istatistik */}
+              <div style={{background:"#141820",border:"1px solid #1e2430",borderRadius:12,padding:20,marginBottom:20}}>
+                <div style={{fontSize:12,fontWeight:700,letterSpacing:"0.1em",color:"#64748b",marginBottom:16,textTransform:"uppercase"}}>Tür Bazlı Aylık Ortalama Tüketim</div>
+                <div style={{overflowX:"auto"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse"}}>
+                    <thead>
+                      <tr style={{borderBottom:"1px solid #1e2430"}}>
+                        {["Tür","Kalem","2024 Ort./Ay","2025 Ort./Ay","Son 12 Ay Ort.","Trend"].map(h=>(
+                          <th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:10,color:"#475569",letterSpacing:"0.07em",fontWeight:700}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {turStats.map(t=>{
+                        const trend = t.ort2024>0?((t.ort2025-t.ort2024)/t.ort2024*100):null;
+                        return (
+                          <tr key={t.tur} style={{borderBottom:"1px solid #1e2430"}}
+                            onMouseEnter={e=>e.currentTarget.style.background="#1a2130"}
+                            onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                            <td style={{padding:"11px 14px"}}><span style={{background:"#1e2430",padding:"3px 10px",borderRadius:4,fontSize:12,color:"#94a3b8",fontWeight:700}}>{t.tur}</span></td>
+                            <td style={{padding:"11px 14px",color:"#64748b",fontSize:12}}>{t.sayi}</td>
+                            <td style={{padding:"11px 14px",color:"#a78bfa",fontSize:13,fontFamily:"monospace",fontWeight:600}}>{N(t.ort2024)}</td>
+                            <td style={{padding:"11px 14px",color:"#34d399",fontSize:13,fontFamily:"monospace",fontWeight:600}}>{N(t.ort2025)}</td>
+                            <td style={{padding:"11px 14px",color:"#fbbf24",fontSize:13,fontFamily:"monospace",fontWeight:600}}>{N(t.s12)}</td>
+                            <td style={{padding:"11px 14px"}}>
+                              {trend!==null && (
+                                <span style={{color:trend>0?"#34d399":"#f87171",fontWeight:700,fontSize:12}}>
+                                  {trend>0?"▲":"▼"} %{Math.abs(trend).toFixed(1)}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Her hammadde için yıllık istatistik */}
+              <div style={{background:"#141820",border:"1px solid #1e2430",borderRadius:12,padding:20}}>
+                <div style={{fontSize:12,fontWeight:700,letterSpacing:"0.1em",color:"#64748b",marginBottom:16,textTransform:"uppercase"}}>Hammadde Bazlı Tüketim İstatistikleri (2025 tüketimine göre sıralı)</div>
+                <div style={{overflowX:"auto"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",minWidth:900}}>
+                    <thead>
+                      <tr style={{borderBottom:"2px solid #1e2430",background:"#0d1017"}}>
+                        {["Hammadde","Tür","2023 Ort.","2024 Ort.","2025 Ort.","Son 12 Ay","Son 3 Ay","2025 Trend","Gösterge"].map(h=>(
+                          <th key={h} style={{padding:"10px 12px",textAlign:"left",fontSize:10,color:"#475569",letterSpacing:"0.07em",fontWeight:700,whiteSpace:"nowrap"}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {hammaddeStats.map(m=>{
+                        const trendRenk = m.trend===null?"#64748b":m.trend>10?"#34d399":m.trend<-10?"#f87171":"#fbbf24";
+                        const barYuzde = maxO25>0?Math.round(m.o25/maxO25*100):0;
+                        return (
+                          <tr key={m.id} style={{borderBottom:"1px solid #1e2430"}}
+                            onMouseEnter={e=>e.currentTarget.style.background="#1a2130"}
+                            onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                            <td style={{padding:"10px 12px",maxWidth:200}}>
+                              <div style={{fontWeight:600,color:"#f1f5f9",fontSize:12}}>{m.hammaddeIsmi}</div>
+                              {m.tedarikci&&<div style={{fontSize:10,color:"#475569"}}>🏭 {m.tedarikci}</div>}
+                            </td>
+                            <td style={{padding:"10px 12px"}}><span style={{background:"#1e2430",padding:"2px 7px",borderRadius:3,fontSize:10,color:"#94a3b8"}}>{m.tur}</span></td>
+                            <td style={{padding:"10px 12px",color:"#60a5fa",fontSize:12,fontFamily:"monospace",textAlign:"right"}}>{N(m.o23)}</td>
+                            <td style={{padding:"10px 12px",color:"#a78bfa",fontSize:12,fontFamily:"monospace",textAlign:"right"}}>{N(m.o24)}</td>
+                            <td style={{padding:"10px 12px",color:"#34d399",fontSize:12,fontFamily:"monospace",textAlign:"right",fontWeight:700}}>{N(m.o25)}</td>
+                            <td style={{padding:"10px 12px",color:"#fbbf24",fontSize:12,fontFamily:"monospace",textAlign:"right"}}>{m.s12>0?N(m.s12):"—"}</td>
+                            <td style={{padding:"10px 12px",color:"#fb923c",fontSize:12,fontFamily:"monospace",textAlign:"right"}}>{m.s3>0?N(m.s3):"—"}</td>
+                            <td style={{padding:"10px 12px"}}>
+                              {m.trend!==null?(
+                                <span style={{color:trendRenk,fontWeight:700,fontSize:11}}>
+                                  {m.trend>0?"▲":"▼"} %{Math.abs(m.trend).toFixed(1)}
+                                </span>
+                              ):<span style={{color:"#334155"}}>—</span>}
+                            </td>
+                            <td style={{padding:"10px 12px",minWidth:100}}>
+                              <div style={{height:6,background:"#1e2430",borderRadius:3}}>
+                                <div style={{width:`${barYuzde}%`,height:"100%",background:"linear-gradient(90deg,#3b82f6,#8b5cf6)",borderRadius:3}}/>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* İHTİYAÇ LİSTESİ EKRANI */}
+        {ekran==="ihtiyac" && (()=>{
+          const ihtiyacListe = liste
+            .filter(m => {
+              const stok = parseFloat(m.stokMiktari);
+              const opt = parseFloat(m.hesaplananOptimum);
+              return !isNaN(stok) && !isNaN(opt) && opt > 0 && stok < opt;
+            })
+            .map(m => {
+              const stok = parseFloat(m.stokMiktari);
+              const opt = parseFloat(m.hesaplananOptimum);
+              const eksik = opt - stok;
+              const oran = stok / opt;
+              // Son 12 ay ort hesapla (2025 + 2026 mevcut aylar)
+              const t2025 = Object.values(m.tuketim["2025"]).map(v=>parseFloat(v)).filter(v=>!isNaN(v)&&v>0);
+              const t2026 = Object.values(m.tuketim["2026"]).map(v=>parseFloat(v)).filter(v=>!isNaN(v)&&v>0);
+              const tumTuk = [...t2025, ...t2026];
+              const aylikOrt = tumTuk.length ? tumTuk.reduce((s,v)=>s+v,0)/tumTuk.length : 0;
+              const kalanGun = aylikOrt > 0 ? Math.round(stok / (aylikOrt / 30)) : null;
+              return { ...m, stok, opt, eksik, oran, aylikOrt, kalanGun };
+            })
+            .sort((a,b) => a.oran - b.oran); // en kritik önce
+
+          const acil = ihtiyacListe.filter(m=>m.oran < 0.25);
+          const orta = ihtiyacListe.filter(m=>m.oran >= 0.25 && m.oran < 0.75);
+          const dusuk = ihtiyacListe.filter(m=>m.oran >= 0.75);
+
+          return (
+            <div style={{animation:"fadeIn 0.3s"}}>
+              <div style={{marginBottom:20}}>
+                <h2 style={{fontSize:22,fontWeight:700,color:"#f1f5f9",marginBottom:4}}>⚠️ İhtiyaç Listesi</h2>
+                <p style={{color:"#475569",fontSize:13}}>Stok miktarı hesaplanan optimumun altında kalan hammaddeler</p>
+              </div>
+
+              {/* Özet kartlar */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:24}}>
+                {[
+                  {label:"Toplam İhtiyaç",val:ihtiyacListe.length+" kalem",renk:"#f59e0b",bg:"#2a1f0a",icon:"📦"},
+                  {label:"Acil (<%25)",val:acil.length+" kalem",renk:"#ef4444",bg:"#2d1a1a",icon:"🚨"},
+                  {label:"Orta (%25–75)",val:orta.length+" kalem",renk:"#f97316",bg:"#2a1a0a",icon:"⚠️"},
+                  {label:"Düşük (>%75)",val:dusuk.length+" kalem",renk:"#eab308",bg:"#1f1e0a",icon:"📉"},
+                ].map((k,i)=>(
+                  <div key={i} style={{background:k.bg,border:`1px solid ${k.renk}44`,borderRadius:12,padding:18,borderTop:`3px solid ${k.renk}`}}>
+                    <div style={{fontSize:22,marginBottom:8}}>{k.icon}</div>
+                    <div style={{fontSize:22,fontWeight:700,color:k.renk}}>{k.val}</div>
+                    <div style={{fontSize:11,color:"#64748b",marginTop:4}}>{k.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {ihtiyacListe.length === 0 ? (
+                <div style={{textAlign:"center",padding:60,color:"#334155"}}>
+                  <div style={{fontSize:48,marginBottom:12}}>✅</div>
+                  <div style={{fontSize:16,color:"#475569"}}>Tüm hammaddeler yeterli stok seviyesinde!</div>
+                </div>
+              ) : (
+                <div style={{background:"#141820",border:"1px solid #1e2430",borderRadius:12,overflow:"hidden"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse"}}>
+                    <thead>
+                      <tr style={{background:"#0d1017",borderBottom:"2px solid #1e2430"}}>
+                        {["Öncelik","S/K","Stok Kodu","Hammadde İsmi","Tür","Mevcut Stok","Optimum","Eksik Miktar","Doluluk","Aylık Ort. Tük.","Tahmini Tükenme","Termin","İşlem"].map(h=>(
+                          <th key={h} style={{padding:"11px 13px",textAlign:"left",fontSize:10,color:"#475569",letterSpacing:"0.07em",fontWeight:700,whiteSpace:"nowrap"}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ihtiyacListe.map((m,idx)=>{
+                        const oncelik = m.oran < 0.25
+                          ? {renk:"#ef4444",bg:"#2d1a1a",etiket:"ACİL",icon:"🚨"}
+                          : m.oran < 0.75
+                          ? {renk:"#f97316",bg:"#2a1a0a",etiket:"ORTA",icon:"⚠️"}
+                          : {renk:"#eab308",bg:"#1f1e0a",etiket:"DÜŞÜK",icon:"📉"};
+                        const yuzde = Math.round(m.oran * 100);
+                        const kalanText = m.kalanGun !== null
+                          ? m.kalanGun <= 0 ? "Tükendi!"
+                          : m.kalanGun < 30 ? `${m.kalanGun} gün`
+                          : `~${Math.round(m.kalanGun/30)} ay`
+                          : "—";
+                        const kalanRenk = m.kalanGun !== null
+                          ? m.kalanGun <= 7 ? "#ef4444"
+                          : m.kalanGun <= 30 ? "#f97316"
+                          : m.kalanGun <= 90 ? "#eab308"
+                          : "#94a3b8"
+                          : "#64748b";
+                        return (
+                          <tr key={m.id} style={{borderBottom:"1px solid #1e2430"}}
+                            onMouseEnter={e=>e.currentTarget.style.background="#1a2130"}
+                            onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                            <td style={{padding:"12px 13px"}}>
+                              <span style={{background:oncelik.bg,color:oncelik.renk,padding:"3px 9px",borderRadius:5,fontSize:11,fontWeight:700,border:`1px solid ${oncelik.renk}44`,whiteSpace:"nowrap"}}>
+                                {oncelik.icon} {oncelik.etiket}
+                              </span>
+                            </td>
+                            <td style={{padding:"12px 13px"}}>
+                              <span style={{padding:"2px 8px",borderRadius:4,fontSize:11,fontWeight:700,background:m.sk==="S"?"#1d3557":"#2d1a1a",color:m.sk==="S"?"#60a5fa":"#f87171"}}>{m.sk}</span>
+                            </td>
+                            <td style={{padding:"12px 13px",color:"#94a3b8",fontSize:12,fontFamily:"monospace"}}>{m.stokKodu}</td>
+                            <td style={{padding:"12px 13px",fontWeight:600,color:"#f1f5f9",fontSize:13,maxWidth:220}}>{m.hammaddeIsmi}</td>
+                            <td style={{padding:"12px 13px"}}><span style={{background:"#1e2430",padding:"2px 8px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.tur}</span></td>
+                            <td style={{padding:"12px 13px",fontWeight:700,color:"#f87171",fontSize:13}}>{m.stok.toLocaleString("tr-TR")}</td>
+                            <td style={{padding:"12px 13px",color:"#64748b",fontSize:12}}>{m.opt.toLocaleString("tr-TR")}</td>
+                            <td style={{padding:"12px 13px",fontWeight:700,color:oncelik.renk,fontSize:13}}>{m.eksik.toLocaleString("tr-TR")}</td>
+                            <td style={{padding:"12px 13px",minWidth:120}}>
+                              <div style={{marginBottom:4,display:"flex",justifyContent:"space-between"}}>
+                                <span style={{fontSize:11,color:oncelik.renk,fontWeight:700}}>%{yuzde}</span>
+                              </div>
+                              <div style={{height:8,background:"#1e2430",borderRadius:4,overflow:"hidden"}}>
+                                <div style={{
+                                  width:`${yuzde}%`,height:"100%",borderRadius:4,
+                                  background: m.oran<0.25?"linear-gradient(90deg,#ef4444,#f97316)"
+                                    : m.oran<0.75?"linear-gradient(90deg,#f97316,#eab308)"
+                                    : "linear-gradient(90deg,#eab308,#84cc16)",
+                                  transition:"width 0.5s"
+                                }}/>
+                              </div>
+                            </td>
+                            <td style={{padding:"12px 13px",color:"#94a3b8",fontSize:12}}>{m.aylikOrt>0?Math.round(m.aylikOrt).toLocaleString("tr-TR"):"—"}</td>
+                            <td style={{padding:"12px 13px",fontWeight:700,color:kalanRenk,fontSize:13,whiteSpace:"nowrap"}}>{kalanText}</td>
+                            <td style={{padding:"12px 13px",color:"#64748b",fontSize:12}}>{m.terminSuresi?m.terminSuresi+" gün":"—"}</td>
+                            <td style={{padding:"12px 13px"}}>
+                              <div style={{display:"flex",gap:6}}>
+                                <button onClick={()=>detay(m)} title="Detay" style={{background:"#1e2430",border:"none",borderRadius:6,padding:"5px 9px",cursor:"pointer",fontSize:13}}>👁</button>
+                                <button onClick={()=>duzenle(m)} title="Düzenle" style={{background:"#1e2430",border:"none",borderRadius:6,padding:"5px 9px",cursor:"pointer",fontSize:13}}>✏️</button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* DETAY EKRANI */}
+        {ekran==="detay" && detayM && (
+          <div style={{animation:"fadeIn 0.3s"}}>
+            <div style={{marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                  <span style={{padding:"3px 10px",borderRadius:5,fontSize:12,fontWeight:700,background:detayM.sk==="S"?"#1d3557":"#2d1a1a",color:detayM.sk==="S"?"#60a5fa":"#f87171"}}>{detayM.sk === "S" ? "S — Standart" : "K — Kapalı"}</span>
+                  <span style={{background:"#1e2430",padding:"3px 10px",borderRadius:4,fontSize:12,color:"#94a3b8"}}>{detayM.tur}</span>
+                </div>
+                <h2 style={{fontSize:22,fontWeight:700,color:"#f1f5f9"}}>{detayM.hammaddeIsmi}</h2>
+                <p style={{color:"#475569",fontSize:13,marginTop:2}}>Stok: {detayM.stokKodu} · Ürün: {detayM.urunKodu}</p>
+              </div>
+              <button className="btn-primary" onClick={()=>duzenle(detayM)}>✏️ Düzenle</button>
+            </div>
+
+            {/* Özet kartlar */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:16}}>
+              {[
+                {label:"Stok Miktarı",val:detayM.stokMiktari?Number(detayM.stokMiktari).toLocaleString("tr-TR")+" kg":"—",renk:"#34d399"},
+                {label:"Hesaplanan Optimum",val:detayM.hesaplananOptimum?Number(detayM.hesaplananOptimum).toLocaleString("tr-TR"):"—",renk:"#60a5fa"},
+                {label:"Termin Süresi",val:detayM.terminSuresi?detayM.terminSuresi+" gün":"—",renk:"#fbbf24"},
+              ].map((k,i)=>(
+                <div key={i} className="card">
+                  <div style={{fontSize:11,color:"#475569",marginBottom:6,letterSpacing:"0.06em",textTransform:"uppercase"}}>{k.label}</div>
+                  <div style={{fontSize:22,fontWeight:700,color:k.renk}}>{k.val}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tüketim tablosu */}
+            <div className="card">
+              <div className="section-title">📅 Tüketim Verileri</div>
+              <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",minWidth:700}}>
+                  <thead>
+                    <tr style={{borderBottom:"1px solid #1e2430"}}>
+                      <th style={{padding:"8px 12px",textAlign:"left",fontSize:11,color:"#475569",fontWeight:700}}>YIL</th>
+                      {AYLAR.map(a=><th key={a} style={{padding:"8px 10px",textAlign:"right",fontSize:11,color:"#475569",fontWeight:700}}>{a.slice(0,3)}</th>)}
+                      <th style={{padding:"8px 12px",textAlign:"right",fontSize:11,color:"#475569",fontWeight:700}}>ORT.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {YILLAR.map(y=>{
+                      const renk = YIL_RENKLER[y];
+                      const vals = AYLAR.map(a=>parseFloat(detayM.tuketim[y][a])).filter(v=>!isNaN(v)&&v>0);
+                      const ort = vals.length?(vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(0):"—";
+                      return (
+                        <tr key={y} style={{borderBottom:"1px solid #1e2430"}}>
+                          <td style={{padding:"10px 12px"}}>
+                            <span style={{fontWeight:700,color:renk.text,fontSize:13}}>{y}</span>
+                          </td>
+                          {AYLAR.map(a=>{
+                            const v = detayM.tuketim[y][a];
+                            return <td key={a} style={{padding:"10px 10px",textAlign:"right",fontSize:12,color:v?renk.text:"#2d3748",fontFamily:"monospace"}}>{v?Number(v).toLocaleString("tr-TR"):"—"}</td>;
+                          })}
+                          <td style={{padding:"10px 12px",textAlign:"right",fontWeight:700,color:renk.text,fontSize:12}}>{ort!=="—"?Number(ort).toLocaleString("tr-TR"):ort}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
